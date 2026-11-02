@@ -1,0 +1,1 @@
+{"chain":{"id":"hatzi-hinam","name":"חצי חינם","portal":"https://shop.hazi-hinam.co.il/Prices","checked_at":"2026-11-02T23:09:57.767720+00:00","discovered":0,"priced":0,"errors":["Stores: GET https://shop.hazi-hinam.co.il/Prices -> HTTP 403","GET https://shop.hazi-hinam.co.il/Prices -> HTTP 403"],"status":"blocked"},"stores":[]}

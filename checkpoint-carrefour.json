@@ -1,0 +1,1 @@
+{"chain":{"id":"carrefour","name":"קרפור","portal":"https://prices.carrefour.co.il","checked_at":"2026-11-02T23:09:57.767177+00:00","discovered":0,"priced":0,"errors":["Stores: GET https://prices.carrefour.co.il/ failed after 2 attempts: timed out","GET https://prices.carrefour.co.il/ failed after 2 attempts: timed out"],"status":"blocked"},"stores":[]}
