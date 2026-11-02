@@ -26,8 +26,10 @@ export default async function handler(req,res) {
   try { snapshot=JSON.parse(await readFile(join(process.cwd(),'public','prices.json'),'utf8')); }
   catch { return res.status(503).json({error:'ממתינים להורדה הראשונה של קובצי המחירים הרשמיים. אין כרגע נתוני אמת זמינים.'}); }
   const basket=items.map(parseLine);
+  const nameToBarcode=new Map();for(const store of snapshot.stores||[])for(const p of store.products||[])if(p.name&&p.barcode)nameToBarcode.set(normalize(p.name),String(p.barcode));
+  for(const entry of basket){entry.barcode=nameToBarcode.get(normalize(entry.query))||entry.query;}
   const stores=(snapshot.stores||[]).filter(s=>normalize(s.city).includes(normalize(city))||normalize(s.name).includes(normalize(city))).map(s=>{
-    const matches=basket.map(entry=>({entry,product:findMatch(s.products||[],entry.query)}));
+    const matches=basket.map(entry=>({entry,product:findMatch(s.products||[],entry.barcode)}));
     const missing=matches.filter(x=>!x.product).map(x=>x.entry.query);
     const total=matches.reduce((sum,x)=>sum+(x.product?x.product.price*x.entry.quantity:0),0);
     return {chain_name:s.chain,branch_name:s.name,city:s.city,total:Math.round(total*100)/100,missing_items:missing,matched_count:matches.length-missing.length,requested_count:basket.length,products:matches.filter(x=>x.product).map(x=>({name:x.product.name,price:x.product.price,quantity:x.entry.quantity}))};
