@@ -1,0 +1,1 @@
+export default function handler(req,res){res.setHeader('Cache-Control','no-store');res.status(200).json({connected:false,reason:'No live supermarket pricing integration has been verified yet.'});}
