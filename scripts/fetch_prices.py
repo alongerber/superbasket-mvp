@@ -28,8 +28,10 @@ def source(ref,payload=None):return {'file':ref.name,'published_at':stamp(ref.pu
 def listing(a,kind):
  latest={};cutoff=datetime.now(TZ).replace(tzinfo=None)-timedelta(hours=36)
  for ref in a.iter_files(file_type=kind):
-  if ref.published_at and ref.published_at<cutoff:break
-  if ref.store_id is not None:latest.setdefault(sid(ref.store_id),ref)
+  if ref.published_at and ref.published_at<cutoff:continue
+  if ref.store_id is not None:
+   key=sid(ref.store_id);previous=latest.get(key)
+   if not previous or (ref.published_at or datetime.min)>(previous.published_at or datetime.min):latest[key]=ref
  return latest
 def price_rows(parsed,chain):
  rows={}
@@ -51,7 +53,7 @@ def collect_chain(info,old_stores,max_stores=0):
     key=f'{info.slug}--{sid(s.store_id)}';stores[key]={**previous.get(key,{}),'id':key,'chain':info.slug,'chain_name':result['name'],'store_id':s.store_id,'name':s.name or s.store_id,'city':s.city or '','address':s.address or '','portal':info.portal_url,'metadata_verified':True}
    result['discovered']=len(metadata.stores)
   except Exception as exc:result['errors'].append('Stores: '+str(exc)[:220])
-  full=listing(a,ilp.FileType.PRICE_FULL)
+  full={sid(s['store_id']):None for s in stores.values()} if info.slug=='shufersal' and stores else listing(a,ilp.FileType.PRICE_FULL)
   try:delta={} if info.slug=='shufersal' else listing(a,ilp.FileType.PRICE)
   except Exception as exc:delta={};result['errors'].append('Price updates: '+str(exc)[:220])
   try:promos={} if info.slug=='shufersal' else listing(a,ilp.FileType.PROMO_FULL)
