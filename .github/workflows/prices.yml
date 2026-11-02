@@ -6,14 +6,15 @@ on:
   push:
     branches: [main, codex/salik-national]
     paths:
-      - 'scripts/fetch_prices.py'
+      - 'scripts/*.py'
+      - 'data/cities.json'
       - 'scripts/requirements.txt'
       - '.github/workflows/prices.yml'
 permissions:
   contents: write
 concurrency:
   group: official-price-refresh
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -37,19 +38,9 @@ jobs:
           python -c 'from pathlib import Path; Path(".snapshots/vercel.json").write_text("{\"ignoreCommand\":\"exit 0\"}\n")'
       - run: pip install -r scripts/requirements.txt
       - name: Collect all accessible official branches
-        run: python scripts/fetch_prices.py --workers 8
+        run: python scripts/run_collection.py
       - name: Validate checksums and coverage before publishing
         run: python scripts/validate_data.py
-      - name: Publish atomic price generation
-        run: |
-          cd .snapshots
-          git config user.name "superbasket-bot"
-          git config user.email "superbasket-bot@users.noreply.github.com"
-          git add manifest.json objects checkpoint-*.json vercel.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Refresh verified official prices"
-            git push origin HEAD:price-data
-          fi
       - name: Record measured coverage
         if: always()
         run: |

@@ -1,11 +1,12 @@
 """National official-file collector. Atomic branch snapshots, source times and history."""
-import argparse,concurrent.futures,gzip,hashlib,json,os,re,sqlite3,threading
+import argparse,concurrent.futures,gzip,hashlib,json,os,re,sqlite3,threading,fcntl
 from datetime import datetime,timedelta,timezone
 from decimal import Decimal
 from pathlib import Path
 from zoneinfo import ZoneInfo
 import israeli_prices as ilp
 from israeli_prices.core.http import HttpClient
+from official_adapters import FilteredShufersal
 TZ=ZoneInfo('Asia/Jerusalem');ROOT=Path(__file__).resolve().parents[1]
 OUT=Path(os.getenv('DATA_DIR',str(ROOT/'.snapshots')));OUT.mkdir(parents=True,exist_ok=True);(OUT/'objects').mkdir(exist_ok=True)
 def now():return datetime.now(timezone.utc).isoformat()
@@ -25,7 +26,7 @@ def put_object(v):
  return key
 def source(ref,payload=None):return {'file':ref.name,'published_at':stamp(ref.published_at),'sha256':hashlib.sha256(payload).hexdigest() if payload else None}
 def listing(a,kind):
- latest={};cutoff=datetime.now(TZ).replace(tzinfo=None)-timedelta(days=4)
+ latest={};cutoff=datetime.now(TZ).replace(tzinfo=None)-timedelta(hours=36)
  for ref in a.iter_files(file_type=kind):
   if ref.published_at and ref.published_at<cutoff:break
   if ref.store_id is not None:latest.setdefault(sid(ref.store_id),ref)
@@ -43,7 +44,7 @@ def collect_chain(info,old_stores,max_stores=0):
  previous={s['id']:s for s in old_stores if s['chain']==info.slug};stores=dict(previous);client=HttpClient(timeout=30,retries=2)
  try:
   if not info.implemented:raise ValueError('No working adapter for this official portal')
-  a=ilp.get_adapter(info.slug,client)
+  a=FilteredShufersal(client) if info.slug=='shufersal' else ilp.get_adapter(info.slug,client)
   try:
    ref=a.latest(ilp.FileType.STORES);metadata=ilp.parse(a.download(ref));result['stores_source']=source(ref)
    for s in metadata.stores:
@@ -51,9 +52,9 @@ def collect_chain(info,old_stores,max_stores=0):
    result['discovered']=len(metadata.stores)
   except Exception as exc:result['errors'].append('Stores: '+str(exc)[:220])
   full=listing(a,ilp.FileType.PRICE_FULL)
-  try:delta=listing(a,ilp.FileType.PRICE)
+  try:delta={} if info.slug=='shufersal' else listing(a,ilp.FileType.PRICE)
   except Exception as exc:delta={};result['errors'].append('Price updates: '+str(exc)[:220])
-  try:promos=listing(a,ilp.FileType.PROMO_FULL)
+  try:promos={} if info.slug=='shufersal' else listing(a,ilp.FileType.PROMO_FULL)
   except Exception as exc:promos={};result['errors'].append('Promotions: '+str(exc)[:220])
   for store_id in full:
    key=f'{info.slug}--{store_id}';stores.setdefault(key,{'id':key,'chain':info.slug,'chain_name':result['name'],'store_id':store_id,'name':f'סניף {store_id}','city':'','address':'','portal':info.portal_url,'metadata_verified':False})
@@ -65,8 +66,13 @@ def collect_chain(info,old_stores,max_stores=0):
    store_id,ref=pair
    key=f'{info.slug}--{store_id}';store=stores[key]
    try:
-    prior=read_object(previous[key]['object']) if previous.get(key,{}).get('object') else None
+    prior=read_object(previous[key]['object']) if previous.get(key,{}).get('object') and (OUT/'objects'/previous[key]['object']).exists() else None
     update=delta.get(store_id)
+    if info.slug=='shufersal':
+     # Refresh expiring signed URLs just before downloading each branch.
+     ref=a.latest(ilp.FileType.PRICE_FULL,store_id=store_id)
+     try:update=a.latest(ilp.FileType.PRICE,store_id=store_id)
+     except ilp.FileNotFound:update=None
     if update and (not update.published_at or not ref.published_at or update.published_at<=ref.published_at):update=None
     expected=[r.name for r in (ref,update) if r];old_sources=prior.get('sources',[]) if prior else []
     if prior and [s['file'] for s in old_sources]==expected:products={p['id']:p for p in prior['products']};sources=old_sources
@@ -88,6 +94,9 @@ def collect_chain(info,old_stores,max_stores=0):
     promotion_rows=[];promo_source={};promo_error=None
     try:
      pr=promos.get(store_id)
+     if info.slug=='shufersal':
+      try:pr=a.latest(ilp.FileType.PROMO_FULL,store_id=store_id)
+      except ilp.FileNotFound:pr=None
      if pr:
       if prior and prior.get('promo_source',{}).get('file')==pr.name:promotion_rows=prior['promotions'];promo_source=prior['promo_source']
       else:
@@ -155,9 +164,11 @@ def main():
 
  for c in m['chains']:
   ss=[s for s in stores if s['chain']==c['id']];c['priced']=sum(bool(s.get('object')) for s in ss);c['failed_stores']=sum(bool(s.get('error')) for s in ss)
- export_catalog(stores,m);(OUT/'manifest.json').write_bytes(dump(m));print(json.dumps({k:v for k,v in m.items() if k not in ('chains','stores')},ensure_ascii=False),flush=True)
- keep={m['catalog'],old.get('catalog')}|{s.get('object') for s in stores+old['stores']}
- if not args.export_only:
-  for path in (OUT/'objects').iterdir():
-   if path.name not in keep:path.unlink()
+ with (OUT/'export.lock').open('w') as lock:
+  fcntl.flock(lock,fcntl.LOCK_EX)
+  export_catalog(stores,m);(OUT/'manifest.tmp').write_bytes(dump(m));(OUT/'manifest.tmp').replace(OUT/'manifest.json');print(json.dumps({k:v for k,v in m.items() if k not in ('chains','stores')},ensure_ascii=False),flush=True)
+  keep={m['catalog'],old.get('catalog')}|{s.get('object') for s in stores+old['stores']}
+  if not args.export_only:
+   for path in (OUT/'objects').iterdir():
+    if path.name not in keep:path.unlink()
 if __name__=='__main__':main()
