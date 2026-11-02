@@ -1,0 +1,270 @@
+{
+  "observed_at": "2026-11-02T23:35:10.389983+00:00",
+  "scope": "Local collector observation, NOT published production coverage",
+  "chains": [
+    {
+      "chain": "carrefour",
+      "name": "קרפור",
+      "known": 147,
+      "priced": 0,
+      "errors": [],
+      "portal": "https://prices.carrefour.co.il"
+    },
+    {
+      "chain": "city-market",
+      "name": "סיטי מרקט",
+      "known": 32,
+      "priced": 12,
+      "errors": [],
+      "portal": "https://citymarketkiryatgat.binaprojects.com/Main.aspx"
+    },
+    {
+      "chain": "dor-alon",
+      "name": "דור אלון",
+      "known": 157,
+      "priced": 107,
+      "errors": [],
+      "portal": "https://url.publishedprices.co.il/login"
+    },
+    {
+      "chain": "fresh-market",
+      "name": "פרש מרקט",
+      "known": 48,
+      "priced": 41,
+      "errors": [],
+      "portal": "https://url.publishedprices.co.il/login"
+    },
+    {
+      "chain": "good-pharm",
+      "name": "גוד פארם",
+      "known": 83,
+      "priced": 82,
+      "errors": [],
+      "portal": "https://goodpharm.binaprojects.com/Main.aspx"
+    },
+    {
+      "chain": "hatzi-hinam",
+      "name": "חצי חינם",
+      "known": 13,
+      "priced": 13,
+      "errors": [],
+      "portal": "https://shop.hazi-hinam.co.il/Prices"
+    },
+    {
+      "chain": "het-cohen",
+      "name": "ח. כהן",
+      "known": 0,
+      "priced": 0,
+      "errors": [
+        "Stores: het-cohen: no Stores file"
+      ],
+      "portal": "https://laibcatalog.co.il/hcohen/index.html"
+    },
+    {
+      "chain": "keshet-teamim",
+      "name": "קשת טעמים",
+      "known": 29,
+      "priced": 27,
+      "errors": [],
+      "portal": "https://url.publishedprices.co.il/login"
+    },
+    {
+      "chain": "king-store",
+      "name": "קינג סטור",
+      "known": 48,
+      "priced": 48,
+      "errors": [],
+      "portal": "https://kingstore.binaprojects.com/Main.aspx"
+    },
+    {
+      "chain": "maayan-2000",
+      "name": "מעיין 2000",
+      "known": 38,
+      "priced": 38,
+      "errors": [],
+      "portal": "https://maayan2000.binaprojects.com/Main.aspx"
+    },
+    {
+      "chain": "mahsanei-hashuk",
+      "name": "מחסני השוק",
+      "known": 0,
+      "priced": 0,
+      "errors": [
+        "Stores: mahsanei-hashuk: no Stores file"
+      ],
+      "portal": "https://laibcatalog.co.il/mshuk/index.html"
+    },
+    {
+      "chain": "meshnat-yosef",
+      "name": "משנת יוסף",
+      "known": 4,
+      "priced": 4,
+      "errors": [],
+      "portal": "https://ktshivuk.binaprojects.com/Main.aspx"
+    },
+    {
+      "chain": "nativ-hahesed",
+      "name": "נתיב החסד",
+      "known": 0,
+      "priced": 0,
+      "errors": [
+        "No working adapter for this official portal"
+      ],
+      "portal": "http://141.226.203.152"
+    },
+    {
+      "chain": "osher-ad",
+      "name": "אושר עד",
+      "known": 24,
+      "priced": 24,
+      "errors": [],
+      "portal": "https://url.publishedprices.co.il/login"
+    },
+    {
+      "chain": "politzer",
+      "name": "פוליצר",
+      "known": 8,
+      "priced": 8,
+      "errors": [],
+      "portal": "https://url.publishedprices.co.il/login"
+    },
+    {
+      "chain": "rami-levy",
+      "name": "רמי לוי",
+      "known": 99,
+      "priced": 96,
+      "errors": [],
+      "portal": "https://url.publishedprices.co.il/login"
+    },
+    {
+      "chain": "salach-dabach",
+      "name": "סאלח דבאח",
+      "known": 12,
+      "priced": 6,
+      "errors": [],
+      "portal": "https://url.publishedprices.co.il/login"
+    },
+    {
+      "chain": "shefa-birkat-hashem",
+      "name": "שפע ברכת השם",
+      "known": 22,
+      "priced": 22,
+      "errors": [],
+      "portal": "https://shefabirkathashem.binaprojects.com/Main.aspx"
+    },
+    {
+      "chain": "shufersal",
+      "name": "שופרסל",
+      "known": 418,
+      "priced": 42,
+      "errors": [],
+      "portal": "https://prices.shufersal.co.il"
+    },
+    {
+      "chain": "shuk-hayir",
+      "name": "שוק העיר",
+      "known": 26,
+      "priced": 25,
+      "errors": [],
+      "portal": "https://shuk-hayir.binaprojects.com/Main.aspx"
+    },
+    {
+      "chain": "stop-market",
+      "name": "סטופ מרקט",
+      "known": 11,
+      "priced": 10,
+      "errors": [],
+      "portal": "https://url.publishedprices.co.il/login"
+    },
+    {
+      "chain": "super-bareket",
+      "name": "סופר ברקת",
+      "known": 15,
+      "priced": 14,
+      "errors": [],
+      "portal": "https://superbareket.binaprojects.com/Main.aspx"
+    },
+    {
+      "chain": "super-cofix",
+      "name": "סופר קופיקס",
+      "known": 34,
+      "priced": 0,
+      "errors": [],
+      "portal": "https://url.publishedprices.co.il/login"
+    },
+    {
+      "chain": "super-pharm",
+      "name": "סופר פארם",
+      "known": 307,
+      "priced": 160,
+      "errors": [],
+      "portal": "https://prices.super-pharm.co.il"
+    },
+    {
+      "chain": "super-sapir",
+      "name": "סופר ספיר",
+      "known": 129,
+      "priced": 88,
+      "errors": [],
+      "portal": "https://supersapir.binaprojects.com/Main.aspx"
+    },
+    {
+      "chain": "super-yuda",
+      "name": "סופר יודה",
+      "known": 28,
+      "priced": 25,
+      "errors": [],
+      "portal": "https://url.publishedprices.co.il/login"
+    },
+    {
+      "chain": "tiv-taam",
+      "name": "טיב טעם",
+      "known": 54,
+      "priced": 54,
+      "errors": [],
+      "portal": "https://url.publishedprices.co.il/login"
+    },
+    {
+      "chain": "victory",
+      "name": "ויקטורי",
+      "known": 0,
+      "priced": 0,
+      "errors": [
+        "Stores: victory: no Stores file"
+      ],
+      "portal": "https://laibcatalog.co.il/victory/index.html"
+    },
+    {
+      "chain": "wolt",
+      "name": "וולט",
+      "known": 37,
+      "priced": 32,
+      "errors": [],
+      "portal": "https://wm-gateway.wolt.com/isr-prices/public/v1/index.html"
+    },
+    {
+      "chain": "yellow",
+      "name": "ילו",
+      "known": 245,
+      "priced": 215,
+      "errors": [],
+      "portal": "https://url.publishedprices.co.il/login"
+    },
+    {
+      "chain": "yochananof",
+      "name": "יוחננוף",
+      "known": 51,
+      "priced": 47,
+      "errors": [],
+      "portal": "https://url.publishedprices.co.il/login"
+    },
+    {
+      "chain": "zol-vebegadol",
+      "name": "זול ובגדול",
+      "known": 35,
+      "priced": 34,
+      "errors": [],
+      "portal": "https://zolvebegadol.binaprojects.com/Main.aspx"
+    }
+  ]
+}
