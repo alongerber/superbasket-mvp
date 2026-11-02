@@ -16,3 +16,8 @@ jobs:
       - run: node --check public/app.js
       - run: node --test tests/compare.test.mjs
       - run: node scripts/build.mjs
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - run: pip install -r scripts/requirements.txt
+      - run: python tests/collector_test.py

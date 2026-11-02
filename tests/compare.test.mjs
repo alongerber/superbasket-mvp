@@ -11,3 +11,8 @@ test('no split if even the union has a missing product',()=>{assert.equal(summar
 test('unverified promotions never lower displayed shelf totals',()=>{const r=compareBranch({id:'a',published_at:'2026-11-03T07:00:00Z'},{products:[{id:A,price:500}],promotions:[{promotion_id:'p',discounted_price:'0.01',items:[{gtin:A}]}]},[{id:A,quantity:2}],t);assert.equal(r.total,1000);assert.equal(r.products[0].promotions[0].calculated,false)});
 test('fractional quantity on packaged products is rejected from the result',()=>{const r=compareBranch({id:'a',published_at:'2026-11-03T07:00:00Z'},{products:[{id:A,price:500,weighted:false}]},[{id:A,quantity:.5}],t);assert.equal(r.total,null)});
 test('weighted items calculate rounded agorot',()=>{const r=compareBranch({id:'a',published_at:'2026-11-03T07:00:00Z'},{products:[{id:'chain:1',price:1290,weighted:true}]},[{id:'chain:1',quantity:.375}],t);assert.equal(r.total,484)});
+
+test('invalid publication timestamps cannot enter the recommendation ranking',()=>{
+ const row=compareBranch({id:'bad-time',published_at:'not-a-date'},{products:[{id:'07290000000001',price:100,name:'test'}]},[{id:'07290000000001',quantity:1}]);
+ assert.equal(row.stale,true);assert.equal(summarize([row],[{id:'07290000000001',quantity:1}]).best,null);
+});

@@ -41,6 +41,12 @@ def price_rows(parsed,chain):
   rows[key]={'id':key,'barcode':barcode,'name':p.name,'price':int((p.price*100).quantize(Decimal('1'))),'updated_at':stamp(p.price_update_time),'weighted':bool(p.is_weighted),'unit':p.unit_of_measure,'manufacturer':p.manufacturer,'allow_discount':p.allow_discount,'source_status':p.status}
  return rows
 
+def apply_delta(products,parsed,chain):
+ for p in parsed.items:
+  key=(p.gtin if not p.is_weighted else None) or f'{chain}:{p.item_code}'
+  if p.price is not None and p.price.is_finite() and p.price<=0:products.pop(key,None)
+ products.update(price_rows(parsed,chain))
+
 def collect_chain(info,old_stores,max_stores=0):
  result={'id':info.slug,'name':info.name_he or info.name,'portal':info.portal_url,'checked_at':now(),'discovered':0,'priced':0,'errors':[],'status':'blocked'}
  previous={s['id']:s for s in old_stores if s['chain']==info.slug};stores=dict(previous);client=HttpClient(timeout=30,retries=2)
@@ -87,7 +93,8 @@ def collect_chain(info,old_stores,max_stores=0):
      if update:
       payload=a.download(update);parsed=ilp.parse(payload)
       if parsed.store_id is not None and sid(parsed.store_id)!=store_id:raise ValueError('Delta branch ID mismatch')
-      products.update(price_rows(parsed,info.slug));sources.append(source(update,payload))
+      if parsed.chain_id and info.chain_id and parsed.chain_id!=info.chain_id:raise ValueError('Delta chain ID mismatch')
+      apply_delta(products,parsed,info.slug);sources.append(source(update,payload))
     published_at=sources[-1]['published_at'];history=prior.get('history',{}) if prior else {}
     for p in products.values():
      points=history.setdefault(p['id'],[])
@@ -102,7 +109,10 @@ def collect_chain(info,old_stores,max_stores=0):
      if pr:
       if prior and prior.get('promo_source',{}).get('file')==pr.name:promotion_rows=prior['promotions'];promo_source=prior['promo_source']
       else:
-       payload=a.download(pr);pf=ilp.parse(payload);promotion_rows=[p.model_dump(mode='json') for p in pf.promotions];promo_source=source(pr,payload)
+       payload=a.download(pr);pf=ilp.parse(payload)
+       if pf.store_id is not None and sid(pf.store_id)!=store_id:raise ValueError('Promotion branch ID mismatch')
+       if pf.chain_id and info.chain_id and pf.chain_id!=info.chain_id:raise ValueError('Promotion chain ID mismatch')
+       promotion_rows=[p.model_dump(mode='json') for p in pf.promotions];promo_source=source(pr,payload)
      else:promo_error='No current promotion file'
     except Exception as exc:promo_error=str(exc)[:160]
     obj={'id':key,'products':list(products.values()),'sources':sources,'history':history,'promotions':promotion_rows,'promo_source':promo_source,'promotion_error':promo_error,'published_at':published_at}
@@ -118,7 +128,7 @@ def collect_chain(info,old_stores,max_stores=0):
   result['status']='partial' if result['errors'] or result['failed_stores'] or result['priced']<len(stores) else 'ok'
  except Exception as exc:result['errors'].append(str(exc)[:260])
  finally:client.close()
- (OUT/f'checkpoint-{info.slug}.json').write_bytes(dump({'chain':result,'stores':list(stores.values())}))
+ final_checkpoint=OUT/f'checkpoint-{info.slug}.tmp';final_checkpoint.write_bytes(dump({'chain':result,'stores':list(stores.values())}));final_checkpoint.replace(OUT/f'checkpoint-{info.slug}.json')
  print(f"CHAIN {info.slug}: {result['priced']} priced / {len(stores)} known",flush=True)
  return result,list(stores.values())
 
@@ -156,7 +166,8 @@ def main():
  selected=args.chains.split(',') if args.chains else None;chains=[c for c in ilp.list_chains() if not selected or c.slug in selected];results=[]
  if args.export_only:
   for path in OUT.glob('checkpoint-*.json'):
-   c=read_json(path,{});results.append((c['chain'],c['stores']))
+   c=read_json(path,{})
+   if c:results.append((c['chain'],c['stores']))
  else:
   with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as pool:
    for f in concurrent.futures.as_completed([pool.submit(collect_chain,c,old['stores'],args.max_stores) for c in chains]):results.append(f.result())

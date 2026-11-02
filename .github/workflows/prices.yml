@@ -35,6 +35,7 @@ jobs:
             git -C .snapshots checkout --orphan price-data
             git -C .snapshots rm -rf .
           fi
+          python -c 'from pathlib import Path; [p.unlink() for p in Path(".snapshots").glob("checkpoint-*.json")]'
           python -c 'from pathlib import Path; Path(".snapshots/vercel.json").write_text("{\"ignoreCommand\":\"exit 0\"}\n")'
       - run: pip install -r scripts/requirements.txt
       - name: Collect all accessible official branches

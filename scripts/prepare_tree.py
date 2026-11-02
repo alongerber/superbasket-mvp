@@ -4,6 +4,6 @@ entries=[];binary=[]
 for name in sorted(set(names)):
  p=pathlib.Path(name)
  if not p.exists():entries.append({'path':name,'mode':'100644','type':'blob','sha':None});continue
- if p.suffix=='.png':binary.append({'path':name,'content':base64.b64encode(p.read_bytes()).decode()})
+ if p.suffix in ('.png','.jpg','.jpeg'):binary.append({'path':name,'content':base64.b64encode(p.read_bytes()).decode()})
  else:entries.append({'path':name,'mode':'100644','type':'blob','content':p.read_text()})
 print(json.dumps({'entries':entries,'binary':binary},ensure_ascii=False))

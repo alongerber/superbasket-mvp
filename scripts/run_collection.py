@@ -6,9 +6,11 @@ def command(args,cwd=ROOT):return subprocess.run(args,cwd=cwd,check=True)
 def publish():
  if not any(OUT.glob('checkpoint-*.json')):return
  command(['python','scripts/fetch_prices.py','--export-only']);command(['python','scripts/validate_data.py'])
- m=json.loads((OUT/'manifest.json').read_bytes());paths=['manifest.json','vercel.json']+[p.name for p in OUT.glob('checkpoint-*.json')]+['objects/'+m['catalog']]+['objects/'+s['object'] for s in m['stores'] if s.get('object')]
+ m=json.loads((OUT/'manifest.json').read_bytes());paths=['manifest.json','vercel.json']+['objects/'+m['catalog']]+['objects/'+s['object'] for s in m['stores'] if s.get('object')]
  spec=OUT/'.publish-paths';spec.write_text('\n'.join(sorted(set(paths)))+'\n')
  command(['git','config','user.name','superbasket-bot'],OUT);command(['git','config','user.email','superbasket-bot@users.noreply.github.com'],OUT)
+ # Working checkpoints may advance during export; only the manifest is a published checkpoint.
+ command(['git','rm','--cached','--ignore-unmatch','--','checkpoint-*.json'],OUT)
  command(['git','add','--pathspec-from-file=.publish-paths'],OUT)
  changed=subprocess.run(['git','diff','--cached','--quiet'],cwd=OUT).returncode
  if changed:
