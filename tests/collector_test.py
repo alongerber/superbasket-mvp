@@ -36,4 +36,3 @@ class FailedSourceTests(unittest.TestCase):
    self.assertEqual(next(s for s in stores if s['id']=='test--0')['object'],'keep.json.gz')
    self.assertEqual(result['priced'],1);self.assertEqual(result['status'],'partial')
 if __name__=='__main__':unittest.main()
-
