@@ -1,3 +1,9 @@
-// Photographs only from an exact Open Food Facts barcode match. Never guessed.
-const cache=new Map();let lastRequest=0;
-export default async function handler(req,res){const id=String(req.query?.id||'');if(!/^\d{14}$/.test(id))return res.status(400).json({image:null});if(cache.has(id))return res.json(cache.get(id));if(Date.now()-lastRequest<6000)return res.json({image:null});lastRequest=Date.now();try{const code=id.replace(/^0(?=\d{13}$)/,'');const r=await fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=code,image_front_small_url,product_name`,{headers:{'User-Agent':'Salik/2.0 (https://superbasket-mvp.vercel.app)'},signal:AbortSignal.timeout(4000)});if(!r.ok)throw Error('image unavailable');const d=await r.json();const url=d.product?.image_front_small_url;const valid=d.status===1&&String(d.product?.code).padStart(14,'0')===id&&typeof url==='string'&&url.startsWith('https://images.openfoodfacts.org/');const result={image:valid?url:null,source:valid?'Open Food Facts':null,license:valid?'CC BY-SA 3.0':null};if(cache.size>500)cache.clear();cache.set(id,result);res.setHeader('Cache-Control','public, max-age=86400');return res.json(result);}catch{return res.json({image:null});}}
+import {createImageResolver} from '../lib/product-images.mjs';
+const resolveImage=createImageResolver();
+export default async function handler(req,res){
+ if(req.method&&req.method!=='GET')return res.status(405).json({error:'GET only'});
+ const id=String(req.query?.id||'');if(!/^\d{14}$/.test(id))return res.status(400).json({image:null});
+ const result=await resolveImage(id);
+ res.setHeader('Cache-Control',result.temporary?'no-store':result.image?'public, max-age=86400, s-maxage=604800':'public, max-age=3600');
+ return res.json(result);
+}

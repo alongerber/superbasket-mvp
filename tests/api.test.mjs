@@ -16,3 +16,9 @@ test('live product API: city and chain filtering, full paging, exact ID and hone
  assert.equal(checked,total);assert.ok(total>12);
  const filtered=await call('product',{query:{id,city:'חיפה',chain:'rami-levy',limit:'24'}});assert.ok(filtered.data.prices.every(p=>p.chain==='rami-levy'));assert.equal(filtered.data.next_offset,null);
 });
+test('live basket API: all city pages retain exact totals and report snapshot changes',{skip:!enabled},async()=>{
+ const {collectBasket}=await import('../public/basket-client.mjs');const p=(await call('catalog',{query:{q:'חלב',limit:'1'}})).data.items[0];
+ const d=await collectBasket(async body=>{const r=await call('basket',{method:'POST',body});assert.equal(r.status,200);return r.data;},{city:'חיפה',items:[{id:p.id,quantity:2}],extra_stop_cost:10});
+ assert.ok(d.checked_stores>12);assert.equal(d.checked_stores,d.stores.length+d.errors.length);for(const s of d.stores)for(const product of s.products)if(!product.missing)assert.equal(product.subtotal,product.price*2);
+ const changed=await call('basket',{method:'POST',body:{city:'חיפה',items:[{id:p.id,quantity:1}],as_of:'obsolete'}});assert.equal(changed.status,409);assert.equal(changed.data.code,'SNAPSHOT_CHANGED');
+});

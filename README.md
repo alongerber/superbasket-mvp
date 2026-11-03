@@ -47,3 +47,13 @@ Set `DATA_DIR` to a local snapshot directory for API tests; production reads the
 - UI/API errors never generate sample prices as a fallback.
 
 Collection has per-chain time/failure limits and a global deadline before the CI hard timeout. Push-triggered verification runs collect for 3 minutes; scheduled/manual runs collect for up to 40 minutes, then publish verified checkpoints. The status API reports running, finished, time-budget, failed or interrupted collection separately from source freshness.
+
+## City comparison and shopping handoff (2026-11-03)
+
+`POST /api/basket` now uses stable branch pagination: `offset` (default 0), `limit` (default 12, max 24), and optional `as_of` snapshot guard. Responses include `total_stores`, `checked_stores`, `next_offset`, and `partial`. **API consumers must aggregate every page before presenting a city-wide winner.** The browser does this automatically, displays progress, preserves errors, and computes the global best and two-store split using the shared integer-money module. City comparisons have no 60-branch cutoff; manual selection remains bounded to 60. Cancellation and any cart/scope change invalidate in-flight results.
+
+Two-store shopping is opt-in. The time/fuel amount is a user estimate for the additional stop, not a calculated route. Results separately show merchandise subtotal, extra-stop amount, total and net savings (including when the second store stops being worthwhile). The trip to the first store is not priced.
+
+Images now load for visible products throughout the result list rather than only the first six. Exact-barcode photographs are cached in the browser for up to seven days; temporary upstream errors/throttling are retried and are never stored as confirmed missing images. Source and license links are available in the product sheet. The free Open Food Facts source does not provide complete coverage; the enrichment search returned HTTP 503 during this verification. GS1's manufacturer-maintained image catalog is a potential additional source, but access and reuse terms have not been obtained. No paid image service was activated.
+
+The shopping panel copies names, quantities and barcodes and links to the official Rami Levy, Shufersal and Victory stores. It explicitly does **not** populate their carts, collect payment, reserve stock or place orders. Online prices/delivery can differ from branch shelf prices. Embedded checkout and automatic cart transfer remain unimplemented pending a verified retailer integration.
