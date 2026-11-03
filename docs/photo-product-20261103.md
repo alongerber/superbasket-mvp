@@ -4,7 +4,7 @@ Implemented in the existing Superbasket repository on 2026-11-03.
 
 ## Automated checks
 
-- 44 Node tests passed, including actual local-snapshot API tests, GTIN checksums, the user's OCR symbol fragments, line-specific diagnostics, quantity bounds, low-confidence review, packaging-text candidates, chain identity and explicit alternative semantics.
+- 45 Node tests passed, including actual local-snapshot API tests, GTIN checksums, the user's OCR symbol fragments, line-specific diagnostics, quantity bounds, low-confidence review, packaging-text candidates, chain identity and explicit alternative semantics. A prepared burger containing a cut name is excluded from suggestions for that cut.
 - 9 Python collector tests passed. Their intentionally simulated source failures are expected test output.
 - JavaScript syntax, static build and `git diff --check` passed.
 
@@ -20,3 +20,9 @@ At 390px width, exercised the real file chooser and the browser recognition libr
 - The product sheet fit the 390px viewport without horizontal overflow.
 
 Local snapshot counts are older than production and are not claims about current nationwide coverage. Recognition tests used synthetic QA fixtures, not a promise of accuracy on arbitrary packaging, handwriting or blurred photos. Images are not uploaded to the server for recognition. Visual-only recognition, complete product-image coverage and automatic retailer-cart transfer are not implemented.
+
+## Production verification
+
+The first release was deployed READY on Vercel (`399c82b`) and its GitHub verification workflow succeeded (run 41639758137). The production product query for the reported Shufersal item checked all 23 relevant Haifa branches and returned 10 current prices, with zero source errors, against snapshot 2026-11-03T10:03:36.034917+00:00. Its exact comparison remains within Shufersal because the source identity is retailer-scoped. The separate alternatives endpoint returned 24 national suggestions from multiple other chains. Opening the application in a 390px frame showed the updated scope explanation and alternative selection flow.
+
+The live production site also accepted the EAN-13 image through its file chooser and returned the exact catalog milk product 07290107932080. Production UI evidence: `product-alternatives-20261103.jpg`.

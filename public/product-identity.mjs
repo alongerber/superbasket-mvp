@@ -9,7 +9,9 @@ export function alternativeTerms(name){
 export function rankAlternatives(source,candidates){
  const origin=identity(source),terms=alternativeTerms(source.name),main=terms[0];if(!main)return [];
  const attributes=[['טרי','קפוא','מופשר'],['עגל','בקר','כבש','עוף'],['חלק','מוכשר']];
- const ranked=candidates.filter(p=>p.id!==source.id&&(!origin.chain||identity(p).chain!==origin.chain)&&Boolean(p.weighted)===Boolean(source.weighted)&&alternativeTerms(p.name).some(w=>w.startsWith(main)||main.startsWith(w))).map(p=>{
+ const prepared=['המבורגר','המבורגרים','בורגר','קבב','נקניק','נקניקיות'];
+ const preparedType=name=>alternativeTerms(name).find(word=>prepared.includes(word))||null;
+ const ranked=candidates.filter(p=>p.id!==source.id&&(!origin.chain||identity(p).chain!==origin.chain)&&Boolean(p.weighted)===Boolean(source.weighted)&&preparedType(p.name)===preparedType(source.name)&&alternativeTerms(p.name).some(w=>w.startsWith(main)||main.startsWith(w))).map(p=>{
   const words=alternativeTerms(p.name),overlap=terms.filter(w=>words.includes(w)).length;
   const differences=attributes.flatMap(group=>{const from=group.find(w=>terms.includes(w)),to=group.find(w=>words.includes(w));return from&&to&&from!==to?[`${from} ← ${to}`]:[];});
   for(const cut of ['אצבעות','אסאדו','טחון','קוביות'])if(words.includes(cut)!==terms.includes(cut))differences.push('תיאור החיתוך שונה: '+cut);
