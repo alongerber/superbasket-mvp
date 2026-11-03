@@ -9,6 +9,7 @@ class FilteredShufersal(ShufersalAdapter):
   categories={None:0,FileType.PRICE:1,FileType.PRICE_FULL:2,FileType.PROMO:3,FileType.PROMO_FULL:4,FileType.STORES:5}
   page=1;seen=set()
   while True:
+   if getattr(self,'budget',None) and not self.budget.allowed():raise TimeoutError(self.budget.reason)
    response=self.client.get('https://prices.shufersal.co.il/FileObject/UpdateCategory',params={'catID':categories[file_type],'storeId':int(store_id or 0),'page':page})
    links=re.findall(r'href="(https://[^\"]+?\.gz[^\"]*)"',response.text);new=0
    for raw in links:

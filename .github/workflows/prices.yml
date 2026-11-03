@@ -2,9 +2,9 @@ name: Refresh official national prices
 on:
   workflow_dispatch:
   schedule:
-    - cron: '18 */3 * * *'
+    - cron: '37 */2 * * *'
   push:
-    branches: [main, codex/salik-national]
+    branches: [main, codex/salik-national, codex/collector-timeout]
     paths:
       - 'scripts/*.py'
       - 'data/cities.json'
@@ -14,11 +14,14 @@ permissions:
   contents: write
 concurrency:
   group: official-price-refresh
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 75
+    env:
+      COLLECTION_MAX_SECONDS: ${{ github.event_name == 'push' && '180' || '2400' }}
+      CHAIN_MAX_SECONDS: '900'
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:

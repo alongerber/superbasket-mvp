@@ -16,7 +16,7 @@ This is a working sharded snapshot architecture, **not a provisioned managed Pos
 
 ## Scheduled collection and monitoring
 
-`.github/workflows/prices.yml` runs every three hours and on collector changes. It collects on an Ubuntu GitHub Actions runner, validates checksums/counts, and atomically commits a generation on `price-data`. Failed downloads remain visible per source/store in `/api/status` and the app's coverage screen. GitHub Actions records execution failures and a measured coverage summary. Scheduled Actions can be delayed by the platform; a schedule is not proof that a particular refresh succeeded.
+`.github/workflows/prices.yml` runs every two hours and on collector changes. It collects on an Ubuntu GitHub Actions runner, validates checksums/counts, and atomically commits a generation on `price-data`. Failed downloads remain visible per source/store in `/api/status` and the app's coverage screen. GitHub Actions records execution failures and a measured coverage summary. Scheduled Actions can be delayed by the platform; a schedule is not proof that a particular refresh succeeded.
 
 ## Run and verify
 
@@ -41,3 +41,5 @@ Set `DATA_DIR` to a local snapshot directory for API tests; production reads the
 - Alerts are checked while opening the app, not background Push. Preferences and baskets are device-local.
 - Photos are shown only after an exact barcode match in Open Food Facts; missing images use a labeled generic symbol. Images: CC BY-SA; price records come from retailer transparency files.
 - UI/API errors never generate sample prices as a fallback.
+
+Collection has per-chain time/failure limits and a global deadline before the CI hard timeout. Push-triggered verification runs collect for 3 minutes; scheduled/manual runs collect for up to 40 minutes, then publish verified checkpoints. The status API reports running, finished, time-budget, failed or interrupted collection separately from source freshness.

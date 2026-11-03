@@ -7,6 +7,7 @@ from zoneinfo import ZoneInfo
 import israeli_prices as ilp
 from israeli_prices.core.http import HttpClient
 from official_adapters import FilteredShufersal
+from collection_control import ChainBudget
 TZ=ZoneInfo('Asia/Jerusalem');ROOT=Path(__file__).resolve().parents[1]
 OUT=Path(os.getenv('DATA_DIR',str(ROOT/'.snapshots')));OUT.mkdir(parents=True,exist_ok=True);(OUT/'objects').mkdir(exist_ok=True)
 def now():return datetime.now(timezone.utc).isoformat()
@@ -22,12 +23,14 @@ def read_json(p,default):
 def read_object(key):return json.loads(gzip.decompress((OUT/'objects'/key).read_bytes()))
 def put_object(v):
  data=gzip.compress(dump(v),compresslevel=6,mtime=0);key=hashlib.sha256(data).hexdigest()+'.json.gz';p=OUT/'objects'/key
- if not p.exists():p.write_bytes(data)
+ if not p.exists():
+  tmp=p.with_name(p.name+f'.{threading.get_ident()}.tmp');tmp.write_bytes(data);tmp.replace(p)
  return key
 def source(ref,payload=None):return {'file':ref.name,'published_at':stamp(ref.published_at),'sha256':hashlib.sha256(payload).hexdigest() if payload else None}
-def listing(a,kind):
+def listing(a,kind,budget=None):
  latest={};cutoff=datetime.now(TZ).replace(tzinfo=None)-timedelta(hours=36)
  for ref in a.iter_files(file_type=kind):
+  if budget and not budget.allowed():raise TimeoutError(budget.reason)
   if ref.published_at and ref.published_at<cutoff:continue
   if ref.store_id is not None:
    key=sid(ref.store_id);previous=latest.get(key)
@@ -49,20 +52,22 @@ def apply_delta(products,parsed,chain):
 
 def collect_chain(info,old_stores,max_stores=0):
  result={'id':info.slug,'name':info.name_he or info.name,'portal':info.portal_url,'checked_at':now(),'discovered':0,'priced':0,'errors':[],'status':'blocked'}
- previous={s['id']:s for s in old_stores if s['chain']==info.slug};stores=dict(previous);client=HttpClient(timeout=30,retries=2)
+ previous={s['id']:s for s in old_stores if s['chain']==info.slug};stores=dict(previous);client=HttpClient(timeout=20,retries=1)
+ budget=ChainBudget(seconds=int(os.getenv('CHAIN_MAX_SECONDS','900')))
  try:
   if not info.implemented:raise ValueError('No working adapter for this official portal')
   a=FilteredShufersal(client) if info.slug=='shufersal' else ilp.get_adapter(info.slug,client)
+  if info.slug=='shufersal':a.budget=budget
   try:
-   ref=a.latest(ilp.FileType.STORES);metadata=ilp.parse(a.download(ref));result['stores_source']=source(ref)
+   ref=a.latest(ilp.FileType.STORES);payload=a.download(ref);metadata=ilp.parse(payload);result['stores_source']=source(ref,payload)
    for s in metadata.stores:
     key=f'{info.slug}--{sid(s.store_id)}';stores[key]={**previous.get(key,{}),'id':key,'chain':info.slug,'chain_name':result['name'],'store_id':s.store_id,'name':s.name or s.store_id,'city':s.city or '','address':s.address or '','portal':info.portal_url,'metadata_verified':True}
    result['discovered']=len(metadata.stores)
   except Exception as exc:result['errors'].append('Stores: '+str(exc)[:220])
-  full={sid(s['store_id']):None for s in stores.values()} if info.slug=='shufersal' and stores else listing(a,ilp.FileType.PRICE_FULL)
-  try:delta={} if info.slug=='shufersal' else listing(a,ilp.FileType.PRICE)
+  full={sid(s['store_id']):None for s in stores.values()} if info.slug=='shufersal' and stores else listing(a,ilp.FileType.PRICE_FULL,budget)
+  try:delta={} if info.slug=='shufersal' else listing(a,ilp.FileType.PRICE,budget)
   except Exception as exc:delta={};result['errors'].append('Price updates: '+str(exc)[:220])
-  try:promos={} if info.slug=='shufersal' else listing(a,ilp.FileType.PROMO_FULL)
+  try:promos={} if info.slug=='shufersal' else listing(a,ilp.FileType.PROMO_FULL,budget)
   except Exception as exc:promos={};result['errors'].append('Promotions: '+str(exc)[:220])
   for store_id in full:
    key=f'{info.slug}--{store_id}';stores.setdefault(key,{'id':key,'chain':info.slug,'chain_name':result['name'],'store_id':store_id,'name':f'סניף {store_id}','city':'','address':'','portal':info.portal_url,'metadata_verified':False})
@@ -71,6 +76,7 @@ def collect_chain(info,old_stores,max_stores=0):
   if max_stores:candidates=candidates[:max_stores]
   checkpoint_lock=threading.Lock()
   def collect_one(pair):
+   if not budget.allowed():return
    store_id,ref=pair
    key=f'{info.slug}--{store_id}';store=stores[key]
    try:
@@ -118,16 +124,22 @@ def collect_chain(info,old_stores,max_stores=0):
     obj={'id':key,'products':list(products.values()),'sources':sources,'history':history,'promotions':promotion_rows,'promo_source':promo_source,'promotion_error':promo_error,'published_at':published_at}
     store.update({'object':put_object(obj),'published_at':published_at,'ingested_at':now(),'checked_at':now(),'price_count':len(products),'error':None,'promotion_count':len(promotion_rows),'promotion_error':promo_error,'source_files':[s['file'] for s in sources]})
     print(f'OK {key}: {len(products)} prices',flush=True)
-   except Exception as exc:store.update({'checked_at':now(),'error':str(exc)[:240]});print(f'FAIL {key}: {str(exc)[:150]}',flush=True)
+    budget.record(True)
+   except Exception as exc:
+    budget.record(False);store.update({'checked_at':now(),'error':str(exc)[:240]});print(f'FAIL {key}: {str(exc)[:150]}',flush=True)
    with checkpoint_lock:
     tmp=OUT/f"checkpoint-{info.slug}.tmp"
     tmp.write_bytes(dump({"chain":result,"stores":list(stores.values())}));tmp.replace(OUT/f"checkpoint-{info.slug}.json")
   with concurrent.futures.ThreadPoolExecutor(max_workers=3) as downloads:
    list(downloads.map(collect_one,candidates))
+  if budget.reason:result['errors'].append(budget.reason)
   result['priced']=sum(bool(s.get('object')) for s in stores.values());result['failed_stores']=sum(bool(s.get('error')) for s in stores.values())
   result['status']='partial' if result['errors'] or result['failed_stores'] or result['priced']<len(stores) else 'ok'
  except Exception as exc:result['errors'].append(str(exc)[:260])
- finally:client.close()
+ finally:
+  client.close();result['priced']=sum(bool(s.get('object')) for s in stores.values())
+  result['failed_stores']=sum(bool(s.get('error')) for s in stores.values())
+  if result['errors']:result['status']='partial' if result['priced'] else 'blocked'
  final_checkpoint=OUT/f'checkpoint-{info.slug}.tmp';final_checkpoint.write_bytes(dump({'chain':result,'stores':list(stores.values())}));final_checkpoint.replace(OUT/f'checkpoint-{info.slug}.json')
  print(f"CHAIN {info.slug}: {result['priced']} priced / {len(stores)} known",flush=True)
  return result,list(stores.values())
@@ -172,7 +184,7 @@ def main():
   with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as pool:
    for f in concurrent.futures.as_completed([pool.submit(collect_chain,c,old['stores'],args.max_stores) for c in chains]):results.append(f.result())
  changed={r[0]['id'] for r in results};stores=[s for s in old['stores'] if s['chain'] not in changed]+[s for _,ss in results for s in ss];cr=[c for c in old['chains'] if c['id'] not in changed]+[r[0] for r in results]
- m={'schema':2,'generated_at':now(),'stores':sorted(stores,key=lambda s:s['id']),'chains':sorted(cr,key=lambda c:c['id']),'registered_chains':len(ilp.list_chains()),'schedule_hours':3,'source':'official-transparency-files','priced_stores':sum(bool(s.get('object')) for s in stores),'price_records':sum(s.get('price_count',0) for s in stores)}
+ m={'schema':2,'generated_at':now(),'stores':sorted(stores,key=lambda s:s['id']),'chains':sorted(cr,key=lambda c:c['id']),'registered_chains':len(ilp.list_chains()),'schedule_hours':2,'collector':read_json(OUT/'collector-state.json',None),'source':'official-transparency-files','priced_stores':sum(bool(s.get('object')) for s in stores),'price_records':sum(s.get('price_count',0) for s in stores)}
  if not m['priced_stores']:raise SystemExit('No verified prices; retaining previous manifest')
 
  for c in m['chains']:
