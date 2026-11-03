@@ -6,6 +6,10 @@ Existing production project: https://superbasket-mvp.vercel.app
 
 Hebrew RTL mobile interface, indexed barcode/name search, explicit list resolution (up to 200 lines), quantities, complete-basket ranking and exact two-store split comparisons including a user-supplied extra-stop cost. Partial and stale baskets cannot win. Saved baskets, share links, dark mode, PWA shell, local activity and price targets. Published promotion conditions are visible but **not subtracted** until their rule semantics are verified. Voice input depends on browser support. Photo OCR loads pinned Tesseract.js in the browser and requires review.
 
+## Product-first interface (November 2026)
+
+Indigo mobile UI with four primary tabs, compact cart rows, a persistent compare action and collapsed advanced options. Product cards and basket rows open a price sheet in one tap. `/api/product` supports city/chain/explicit-store filters and stable pagination (up to 24 source branches per request), replacing the previous silent 12-branch limit. City/selected scopes with up to 120 branches load subsequent pages automatically; national searches are explicitly paged. Fresh-price summaries refer only to checked branches. Failed/missing sources and partial coverage remain visible. Chain grouping retains the underlying branch prices and publication times. Basket results separate complete, current baskets from incomplete or old price lists.
+
 ## Data architecture
 
 `scripts/fetch_prices.py` probes every chain in the pinned `israeli-prices` registry (32 entries). It downloads official Stores, PriceFull, cumulative Price updates and PromoFull files. It validates branch/chain IDs, retains the original filename/publication time/hash, and preserves the last successful branch on failure. Weighted/internal IDs are namespaced to their chain; GTIN-14 is used for packaged goods. Zero/nonpositive prices are not eligible for comparisons.
