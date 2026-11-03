@@ -1,4 +1,4 @@
-# סליק / Superbasket
+# מי סופר? · ME SUPER / Superbasket
 
 Existing production project: https://superbasket-mvp.vercel.app
 
@@ -8,7 +8,7 @@ Hebrew RTL mobile interface, indexed barcode/name search, explicit list resoluti
 
 ## Product-first interface (November 2026)
 
-Indigo mobile UI with four primary tabs, compact cart rows, a persistent compare action and collapsed advanced options. Product cards and basket rows open a price sheet in one tap. `/api/product` supports city/chain/explicit-store filters and stable pagination (up to 24 source branches per request), replacing the previous silent 12-branch limit. City/selected scopes with up to 120 branches load subsequent pages automatically; national searches are explicitly paged. Fresh-price summaries refer only to checked branches. Failed/missing sources and partial coverage remain visible. Chain grouping retains the underlying branch prices and publication times. Basket results separate complete, current baskets from incomplete or old price lists.
+Warm cream, ink and coral mobile UI with five primary tabs, compact cart rows, a persistent compare action and collapsed advanced options. Product cards and basket rows open a price sheet in one tap. `/api/product` supports city/chain/explicit-store filters and stable pagination (up to 24 source branches per request), replacing the previous silent 12-branch limit. City/selected scopes with up to 120 branches load subsequent pages automatically; national searches are explicitly paged. Fresh-price summaries refer only to checked branches. Failed/missing sources and partial coverage remain visible. Chain grouping retains the underlying branch prices and publication times. Basket results separate complete, current baskets from incomplete or old price lists.
 
 ## Data architecture
 
@@ -65,3 +65,15 @@ The camera control now separates shopping-list photos from product photos. Produ
 List diagnostics retain line numbers, offending text and individual reasons for unreadable fragments, invalid barcodes and invalid quantities. Low-confidence OCR requires review. Valid lines may proceed only after an explicit choice. A readable query with no catalog match has a different explanation from a failed catalog request.
 
 Chain-scoped product IDs (especially weighted goods) are labeled as retailer codes, not global barcodes. Their price requests check that chain's branches. `GET /api/catalog?alternatives_for=PRODUCT_ID` offers explicitly unverified alternatives from other chains, preserving the sale unit and flagging known description differences. Suggestions are national; their local prices are checked after selection. No alternative is merged into an exact comparison or added automatically.
+
+## ME SUPER categories and shopping planner
+
+The bilingual brand is **מי סופר? · ME SUPER**, with the signature **מי סופר? בשביל זה יש ME.** Existing local basket, alert and saved-list storage keys remain unchanged. The PWA icon combines a shopping bag with a question mark.
+
+`public/taxonomy.mjs` defines retail departments and nested categories, including cheese types, beef cuts, poultry and fish. `/api/categories` returns measured product counts. `/api/catalog?category=...` provides stable scoped search and pagination. Classification is inferred from price-file names, not supplied by retailers; unknown items remain in an explicit unsorted category. Counts represent national catalog entries, not physical stock or unique global products for retailer-scoped IDs.
+
+The planner supports events and pasted recipes, total guest counts, children, vegetarians, desired budget, pantry items and follow-up changes. It only suggests ingredients. `/api/planner` then searches real catalog records. Customers choose each exact product and confirm the sale quantity before adding it. Only explicit package size or weighted-sale metadata permits a suggested conversion; ambiguous sizes require manual review. Prices remain the existing exact-product comparison engine's responsibility. Saved planning state is device-local.
+
+AI inference is restricted to `nvidia/nemotron-3.5-lightning-free` through Vercel AI Gateway using the deployment's existing OIDC token. Every inference verifies that the official NVIDIA endpoint pricing fields are all zero; an unknown or nonzero value prevents the inference. The provider is allowlisted and there are no fallback models, tools or paid reporting tags. No API keys, credits, paid services or auto-top-up are created. Availability is account-dependent and the upstream price check is not an atomic price lock. NVIDIA's free endpoint may retain prompts for model improvement; this is disclosed beside the send button. Do not submit sensitive personal information. The request rate limit is per function instance, not a distributed traffic-control service.
+
+Six deterministic plans and a conservative line-based recipe parser remain available when AI is unavailable; the interface explicitly labels them as **without AI**. They do not interpret free-form changes, guarantee dietary safety, guarantee a budget, or silently rescale pasted recipe quantities.

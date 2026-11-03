@@ -1,0 +1,3 @@
+import {manifest,catalog,apiError} from '../lib/data.mjs';
+import {categoryIndex} from '../lib/categories.mjs';
+export default async function handler(req,res){if(req.method!=='GET')return res.status(405).json({error:'GET only'});try{const m=await manifest(),db=await catalog(m),index=categoryIndex(db);res.setHeader('Cache-Control','public, max-age=120, s-maxage=300');res.json({categories:index.tree,total:m.products,classified:Object.entries(index.counts).reduce((n,[k,v])=>n+(k==='unclassified'?0:v),0),unclassified:index.counts.unclassified||0,as_of:m.generated_at,classification:'name_inference',note:'הסיווג נגזר משמות המוצרים בקובצי המחירונים. הוא אינו סיווג רשמי של הרשת וייתכנו טעויות.'});}catch(e){return apiError(res,e);}}
