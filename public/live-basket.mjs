@@ -55,7 +55,7 @@ export function createLiveBasket({load, emit, delay = 350, now = Date.now}) {
         cache = {scope, at, data};
         emit({phase: 'ready', data: repriceBasket(data, request.items, at), checkedAt: at});
       } catch (error) {
-        if (sequence === version && !signal.aborted) emit({phase: 'error', data: null, error: error.message});
+        if (sequence === version && !signal.aborted) emit({phase: 'error', data: null, error: error.message, errorProductId:error.product_id, errorCode:error.code});
       }
     }, force ? 0 : delay);
   }
