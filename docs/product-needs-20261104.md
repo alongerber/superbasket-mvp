@@ -4,6 +4,7 @@ A shopper can choose a meat type once and compare a complete basket across retai
 
 ## Implemented behavior
 
+- Type comparisons initially group prices by chain in expandable cards, so chains with many branches do not bury other retailers. The summary reports both chain and branch counts.
 - Separate search suggestions for ribeye, sirloin, beef fillet, chicken breast and chicken thigh, when matching catalog rows exist.
 - Explicit selection of fresh/frozen/thawed, bone wording, optional kashrut stated in the source name, and kilograms.
 - Only weighted records with a declared kilogram unit and a positive integer-agorot price participate. Unknown, per-unit or 100g units are excluded rather than converted speculatively.
