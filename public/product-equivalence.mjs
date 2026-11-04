@@ -12,13 +12,11 @@ export function packageMeasure(product){
  const name=normalized(product.name),measures=[...name.matchAll(amountPattern)];
  if(measures.length!==1)return null; // multiple sizes/net-drained weights need a human decision
  const m=measures[0],value=Number(m[1].replace(',','.')),unit=unitMap[m[2]];if(!unit||value<=0)return null;
- let multiplier=1;const before=name.slice(0,m.index),after=name.slice(m.index+m[0].length);
- const prefix=before.match(/(\d+)\s*[x×*]\s*$/i),suffix=after.match(/^\s*[x×*]\s*(\d+)(?:\s|$)/i);
- if(prefix&&suffix||/\d+[.,]\d+\s*[x×*]/i.test(name))return null;
- if(prefix||suffix)multiplier=Number((prefix||suffix)[1]);
- if((/[x×*]/i.test(name)&&!prefix&&!suffix)||/מארז|שישיה|שישייה|שלישיה|רביעיה|רביעייה|זוג/.test(name)&&multiplier===1)return null;
- if(multiplier<1||multiplier>1000)return null;
- return {basis:unit[0],amount:value*unit[1]*multiplier,label:m[0]+(multiplier>1?' × '+multiplier:''),weighted:false};
+ // Retailer descriptions can contain a shipping-case count for a single consumer barcode
+ // (e.g. "אפרופו כלפ.36*50גרם", sold at the single 50g price). A name alone
+ // cannot establish that the sale unit is the entire case. Never multiply it silently.
+ if(/[×*]|\bx\s*\d|\d\s*x\s*\d/i.test(name)||/\d\s*[-–]\s*\d/.test(name)||/מארז|שישיה|שישייה|שלישיה|רביעיה|רביעייה|זוג/.test(name))return null;
+ return {basis:unit[0],amount:value*unit[1],label:m[0],weighted:false};
 }
 // Extra semantic guards enrich suggestions; every catalog product still supports explicit choices.
 const kinds=[

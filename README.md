@@ -16,6 +16,12 @@ Every physical catalog item can retain its original barcode and an explicitly ap
 
 The server derives conversions from explicit package sizes, rounds up to whole packages, and compares the actual payable line amounts. Ambiguous sizes require an explicit user-entered ratio. Changes to quantity or approved sets invalidate cached quotes. Chosen product identity and purchase quantity survive split shopping, checkout-list copying, checklists, saved/shared baskets and watch keys. A source price is never a stock claim. See [verification and limits](docs/universal-alternatives-20261104.md).
 
+## Partial-price clarity (2026-11-04)
+
+Incomplete baskets are displayed by product coverage and named missing prices. Their subtotal is subordinate and explicitly excludes unpriced lines; it is never the main cart price or a ranked saving. Branch detail lists every requested line with purchased quantities and prices. Pair comparison computes the difference only on the intersection of requested lines with a valid price in both current branches, while showing excluded lines separately. Old price lists never produce a comparable saving.
+
+Package multipliers/ranges inferred only from a source name require explicit quantity approval: official descriptions sometimes contain shipping-case counts for a single consumer barcode. No reported price is divided or otherwise invented to hide a discrepancy. See [evidence and verification](docs/price-clarity-20261104.md).
+
 ## Product-first interface (November 2026)
 
 Warm cream, ink and coral mobile UI with five primary tabs, compact cart rows, a persistent priced basket and collapsed advanced options. Product cards and basket rows open a price sheet in one tap. `/api/product` supports city/chain/explicit-store filters and stable pagination (up to 24 source branches per request), replacing the previous silent 12-branch limit. City/selected scopes with up to 120 branches load subsequent pages automatically; national searches are explicitly paged. Fresh-price summaries refer only to checked branches. Failed/missing sources and partial coverage remain visible. Chain grouping retains the underlying branch prices and publication times. Basket results separate complete, current baskets from incomplete or old price lists.

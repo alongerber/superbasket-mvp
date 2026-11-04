@@ -9,10 +9,11 @@ const store=id=>({id,chain:id,chain_name:id,published_at:new Date().toISOString(
 test('package sizes use the package name, not the reference-price unit field',()=>{
  assert.equal(packageMeasure(p(A,'גבינה לבנה 5% 250 גרם',{unit:'100 גרם'})).amount,250);
  assert.equal(packageMeasure(p(A,'חלב 3% 1 ליטר')).amount,1000);
+ assert.equal(packageMeasure(p(A,'משחת שיניים MAX FRESH 125 מל')).amount,125);
  assert.equal(packageMeasure(p(A,'נייר טואלט 30 גלילים')).amount,30);
- assert.equal(packageMeasure(p(A,'מים 6×1.5 ליטר')).amount,9000);
- assert.equal(packageMeasure(p(A,'יוגורט 150 גרם × 4')).amount,600);
- for(const name of ['טונה 160 גרם מסונן 112 גרם','מארז מים 1.5 ליטר','חיתולים בייבי סופרים','מוצר 36.6×50גרם'])assert.equal(packageMeasure(p(A,name)),null,name);
+ assert.equal(packageMeasure(p(A,'מים 6×1.5 ליטר')),null);
+ assert.equal(packageMeasure(p(A,'יוגורט 150 גרם × 4')),null);
+ for(const name of ['טונה 160 גרם מסונן 112 גרם','מארז מים 1.5 ליטר','חיתולים בייבי סופרים','מוצר 36.6×50גרם','אפרופו כלפ.36*50גרם','מוצר 40-50 גרם'])assert.equal(packageMeasure(p(A,name)),null,name);
  assert.equal(packageMeasure(p(A,'עגבניה',{weighted:true,unit:'לא ידוע'})),null);
  assert.equal(packageMeasure(p(A,'עגבניה',{weighted:true,unit:'1קילוגרם'})).amount,1000);
 });
@@ -96,4 +97,10 @@ test('checkout and checklists use purchased alternative and reset when branch ch
  const item=purchaseItems([original],branch)[0];assert.equal(item.id,A);assert.equal(item.name,'אורז 2 קג');assert.equal(item.quantity,1);assert.equal(item.barcode,B);
  assert.match(shoppingList([item]),/2 קג × 1 אריזות/);assert.notEqual(item.check_key,purchaseItems([original],null)[0].check_key);
  assert.equal(purchaseItems([original],{...branch,stale:true})[0].name,original.name);
+});
+
+test('supplier case counts cannot inflate an approved consumer-unit comparison',()=>{
+ const source=p(A,'אפרופו כלפ.36*50גרם'),candidate=p(B,'חטיף תירס 50 גרם');
+ assert.equal(conversion(source,candidate).automatic,false);
+ assert.equal(conversion(candidate,source).automatic,false);
 });
