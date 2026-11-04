@@ -95,3 +95,7 @@ test('network and provider failures never leak secrets or silently retry with an
  }
  await assert.rejects(generateShoppingPlan({people:4},{env,authorized:true,fetchImpl:async()=>{throw Error('private-test-key')}}),e=>e.code==='AI_UNAVAILABLE'&&!e.message.includes('private-test-key'));
 });
+test('recipe inference omits the default event preset',async()=>{
+ let sent;await generateShoppingPlan({mode:'recipe',recipe:'500 גרם פסטה',people:4},{env,authorized:true,fetchImpl:async(url,options)=>{sent=JSON.parse(options.body);return success();}});
+ const request=JSON.parse(sent.messages[0].content);assert.equal(request.mode,'recipe');assert.equal(request.preset,undefined);assert.equal(request.prompt,'');
+});
