@@ -1,3 +1,4 @@
+import {rankIngredientCandidates} from '../lib/ingredient-matches.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {validateRequest,templatePlan,recipePlan,normalizePlan,packageQuantity} from '../public/planning.mjs';
@@ -98,4 +99,18 @@ test('network and provider failures never leak secrets or silently retry with an
 test('recipe inference omits the default event preset',async()=>{
  let sent;await generateShoppingPlan({mode:'recipe',recipe:'500 גרם פסטה',people:4},{env,authorized:true,fetchImpl:async(url,options)=>{sent=JSON.parse(options.body);return success();}});
  const request=JSON.parse(sent.messages[0].content);assert.equal(request.mode,'recipe');assert.equal(request.preset,undefined);assert.equal(request.prompt,'');
+});
+test('fresh produce matching excludes unrequested preserves and prefers exact fresh names over package status',()=>{
+ const products=[{id:'preserved',name:'לימון כבוש 250 גרם',weighted:false,stores:2000},{id:'juice',name:'מיץ לימון 1 ליטר',weighted:false,stores:2000},{id:'lime',name:'לימון ליים 400 גרם',weighted:false,stores:1000},{id:'fresh',name:'לימון',weighted:true,stores:250}];
+ const ranked=rankIngredientCandidates({name:'לימון',query:'לימון',unit:'unit',group:'produce'},products);
+ assert.equal(ranked[0].id,'fresh');assert.ok(!ranked.some(p=>['preserved','juice'].includes(p.id)));
+ const explicit=rankIngredientCandidates({name:'לימון כבוש',query:'לימון כבוש',unit:'g',group:'produce'},products);assert.equal(explicit[0].id,'preserved');
+ assert.deepEqual(rankIngredientCandidates({name:'לימון',query:'לימון',unit:'unit',group:'produce'},products.slice(0,2)),[]);
+});
+
+test('fresh vegetables do not suggest ready-made salads, pickles or dried seasoning',()=>{
+ for(const [query,processed] of [['חציל','חציל במיונז 250 גרם'],['מלפפון','מלפפון במלח 10-12'],['פלפל אדום','פלפל אדום יבש מתוק']]){
+  const result=rankIngredientCandidates({name:query,query,unit:'unit',group:'produce'},[{id:'processed',name:processed,weighted:false,stores:2000},{id:'fresh',name:query,weighted:true,stores:3}]);
+  assert.deepEqual(result.map(p=>p.id),['fresh']);
+ }
 });

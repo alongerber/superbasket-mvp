@@ -1,0 +1,382 @@
+{
+  "date": "2026-11-04",
+  "model": "claude-haiku-5-5",
+  "approved_test_budget_usd": 1,
+  "estimated_cost_usd": 0.0042094,
+  "billing_statement_verified": false,
+  "requests": [
+    {
+      "case": "bbq-eight",
+      "status": 200,
+      "seconds": 18.26,
+      "usage": {
+        "input_tokens": 1243,
+        "output_tokens": 1929
+      },
+      "estimated_usd": 0.0010888,
+      "ingredients": 23,
+      "matched_before_ranking_fix": 21
+    },
+    {
+      "case": "pancakes-scaled",
+      "status": 200,
+      "seconds": 13.33,
+      "usage": {
+        "input_tokens": 1270,
+        "output_tokens": 929
+      },
+      "estimated_usd": 0.0005915,
+      "ingredients": 5,
+      "matched_before_ranking_fix": 5
+    },
+    {
+      "case": "bbq-corrected",
+      "status": 200,
+      "seconds": 13.96,
+      "usage": {
+        "input_tokens": 1513,
+        "output_tokens": 1153
+      },
+      "estimated_usd": 0.0007277999999999999,
+      "ingredients": 13,
+      "matched_before_ranking_fix": 12
+    },
+    {
+      "case": "pancakes-corrected",
+      "status": 200,
+      "seconds": 11.47,
+      "usage": {
+        "input_tokens": 1532,
+        "output_tokens": 1040
+      },
+      "estimated_usd": 0.0006732,
+      "ingredients": 5,
+      "matched_before_ranking_fix": 5
+    },
+    {
+      "case": "vegan-followup",
+      "status": 200,
+      "seconds": 16.05,
+      "usage": {
+        "input_tokens": 1806,
+        "output_tokens": 1895
+      },
+      "estimated_usd": 0.0011281,
+      "ingredients": 12,
+      "matched_before_ranking_fix": 11
+    }
+  ],
+  "verified_recipe": {
+    "title": "פנקייקים ל־6 סועדים",
+    "summary": "כמויות המתכון המקורי (ל־2 סועדים) הוכפלו פי 3 כך שיספיקו ל־6 סועדים, ללא הוספת מצרכים שאינם במתכון.",
+    "servings": 6,
+    "ingredients": [
+      {
+        "name": "קמח לבן",
+        "query": "קמח לבן",
+        "amount": 600,
+        "unit": "g",
+        "group": "pantry",
+        "note": "מכפלה פי 3 מ־200 גרם למתכון המקורי."
+      },
+      {
+        "name": "חלב",
+        "query": "חלב טרי",
+        "amount": 750,
+        "unit": "ml",
+        "group": "main",
+        "note": "מכפלה פי 3 מ־250 מ״ל למתכון המקורי."
+      },
+      {
+        "name": "ביצים",
+        "query": "ביצים גודל L",
+        "amount": 3,
+        "unit": "unit",
+        "group": "produce",
+        "note": "מכפלה פי 3 מביצה אחת במתכון המקורי."
+      },
+      {
+        "name": "סוכר לבן",
+        "query": "סוכר לבן",
+        "amount": 60,
+        "unit": "g",
+        "group": "pantry",
+        "note": "מכפלה פי 3 מ־20 גרם למתכון המקורי."
+      },
+      {
+        "name": "שמן קנולה",
+        "query": "שמן קנולה",
+        "amount": 60,
+        "unit": "ml",
+        "group": "pantry",
+        "note": "מכפלה פי 3 מ־20 מ״ל למתכון המקורי."
+      }
+    ],
+    "notes": [
+      "ההנחה היא שהמתכון מתאים לקנה מידה ליניארי, כלומר שכל הכמויות מוכפלות פי 3 בלבד.",
+      "לא נוספו מלח, תבלינים או מצרכים אחרים שאינם מופיעים במתכון המקורי.",
+      "יש לבדוק את אריזות המוצרים בעצמכם לגבי כשרות, אלרגנים והתאמה לצרכים תזונתיים."
+    ],
+    "source": "ai",
+    "model": "claude-haiku-5-5",
+    "usage": {
+      "input_tokens": 1532,
+      "output_tokens": 1040
+    }
+  },
+  "verified_followup": {
+    "title": "ארוחת על האש טבעונית ל-8 אנשים",
+    "summary": "ארוחת על האש טבעונית לשמונה סועדים, כולל ילדים, עם טופו צלוי, ירקות טריים על האש, תירס, סלט מלפפון ועגבנייה ולחמניות. השתייה כבר בבית, ולכן לא נוספה.",
+    "servings": 8,
+    "ingredients": [
+      {
+        "name": "טופו קשיח",
+        "query": "טופו קשיח",
+        "amount": 1200,
+        "unit": "g",
+        "group": "main",
+        "note": "המנה העיקרית לשמונה סועדים, בערך 150 גרם לאדם. יש לבדוק על האריזה שהמוצר טבעוני."
+      },
+      {
+        "name": "פלפל אדום",
+        "query": "פלפל אדום",
+        "amount": 4,
+        "unit": "unit",
+        "group": "produce",
+        "note": "לצלייה על האש"
+      },
+      {
+        "name": "חציל",
+        "query": "חציל",
+        "amount": 2,
+        "unit": "unit",
+        "group": "produce",
+        "note": "לצלייה על האש"
+      },
+      {
+        "name": "תירס מתוק טרי",
+        "query": "תירס מתוק טרי",
+        "amount": 4,
+        "unit": "unit",
+        "group": "produce",
+        "note": "לצלייה על האש"
+      },
+      {
+        "name": "עגבנייה",
+        "query": "עגבנייה",
+        "amount": 500,
+        "unit": "g",
+        "group": "produce",
+        "note": "לסלט"
+      },
+      {
+        "name": "מלפפון",
+        "query": "מלפפון",
+        "amount": 4,
+        "unit": "unit",
+        "group": "produce",
+        "note": "לסלט"
+      },
+      {
+        "name": "בצל סגול",
+        "query": "בצל סגול",
+        "amount": 2,
+        "unit": "unit",
+        "group": "produce",
+        "note": "לסלט"
+      },
+      {
+        "name": "לחמניות לחם",
+        "query": "לחמניות לחם",
+        "amount": 1,
+        "unit": "pack",
+        "group": "sides",
+        "note": "יש לבדוק על האריזה שאין חלב, ביצים או דבש."
+      },
+      {
+        "name": "שמן זית",
+        "query": "שמן זית",
+        "amount": 60,
+        "unit": "ml",
+        "group": "pantry",
+        "note": "כמות לטיגון וריסוס של הירקות והטופו לשמונה סועדים"
+      },
+      {
+        "name": "מלח",
+        "query": "מלח",
+        "amount": 1,
+        "unit": "tsp",
+        "group": "pantry",
+        "note": "תיבול כללי לכל המנות"
+      },
+      {
+        "name": "פפריקה מתוקה",
+        "query": "פפריקה מתוקה",
+        "amount": 1,
+        "unit": "tsp",
+        "group": "pantry",
+        "note": "תיבול לטופו ולירקות"
+      },
+      {
+        "name": "לימון",
+        "query": "לימון",
+        "amount": 2,
+        "unit": "unit",
+        "group": "produce",
+        "note": "לסחיטה על הסלט ועל הירקות הצלויים"
+      }
+    ],
+    "notes": [
+      "הנחה: כל שמונת הסועדים טבעונים, כולל הילדים. הוסר העוף והוסרו שיפודי הירקות המוכנים, והירקות הטריים מספקים את רוב התוספות.",
+      "הכמויות של שמן, מלח ופפריקה הן כמויות תיבול למתכון לשמונה אנשים בלבד. אין אישור טבעוניות, כשרות או בטיחות לאלרגנים; יש לבדוק את כל האריזות.",
+      "התקציב של 300 ש\"ח הוא העדפת תכנון בלבד והמחירים ייבדקו בנפרד."
+    ],
+    "source": "ai",
+    "model": "claude-haiku-5-5",
+    "usage": {
+      "input_tokens": 1806,
+      "output_tokens": 1895
+    }
+  },
+  "package_conversions": [
+    {
+      "ingredient": "קמח לבן",
+      "amount": 600,
+      "unit": "g",
+      "product": {
+        "id": "07290003107216",
+        "name": "קמח לבן דגן 1קג",
+        "stores": 303,
+        "weighted": false
+      },
+      "quantity": 1,
+      "label": "אריזות",
+      "verified": true,
+      "reason": "לפי גודל האריזה שמופיע בשם: 1קג"
+    },
+    {
+      "ingredient": "חלב",
+      "amount": 750,
+      "unit": "ml",
+      "product": {
+        "id": "07290001794852",
+        "name": "חלב טרי 3% 1 ליטר רמ",
+        "stores": 74,
+        "weighted": false
+      },
+      "quantity": 1,
+      "label": "אריזות",
+      "verified": true,
+      "reason": "לפי גודל האריזה שמופיע בשם: 1 ליטר"
+    },
+    {
+      "ingredient": "ביצים",
+      "amount": 3,
+      "unit": "unit",
+      "product": {
+        "id": "00693493255363",
+        "name": "תבנית ביצים 12 יח גודל -L",
+        "stores": 78,
+        "weighted": false
+      },
+      "quantity": 1,
+      "label": "אריזות",
+      "verified": true,
+      "reason": "12 יחידות באריזה לפי שם המוצר"
+    },
+    {
+      "ingredient": "סוכר לבן",
+      "amount": 60,
+      "unit": "g",
+      "product": {
+        "id": "07296073746539",
+        "name": "סוכר לבן 1 ק\"ג",
+        "stores": 260,
+        "weighted": false
+      },
+      "quantity": 1,
+      "label": "אריזות",
+      "verified": true,
+      "reason": "לפי גודל האריזה שמופיע בשם: 1 קג"
+    },
+    {
+      "ingredient": "שמן קנולה",
+      "amount": 60,
+      "unit": "ml",
+      "product": {
+        "id": "07290006941466",
+        "name": "שמן קנולה 1 ליטר",
+        "stores": 261,
+        "weighted": false
+      },
+      "quantity": 1,
+      "label": "אריזות",
+      "verified": true,
+      "reason": "לפי גודל האריזה שמופיע בשם: 1 ליטר"
+    }
+  ],
+  "product_price_pagination": {
+    "product": {
+      "id": "07290003107216",
+      "barcode": "07290003107216",
+      "name": "קמח לבן דגן 1קג",
+      "minPrice": 5,
+      "maxPrice": 9.9,
+      "stores": 303,
+      "weighted": false,
+      "unit": "100 גרם",
+      "manufacturer": "לא ידוע",
+      "identity": {
+        "kind": "barcode",
+        "chain": null,
+        "code": "07290003107216"
+      }
+    },
+    "checked_stores": 66,
+    "total_stores": 66,
+    "next_offset": null,
+    "as_of": "2026-11-04T07:24:20.235483+00:00",
+    "errors": [],
+    "price_count": 16,
+    "sample_prices": [
+      {
+        "store_id": "shufersal--388",
+        "store_name": "שופרסל · אקספרס דניה",
+        "chain": "shufersal",
+        "chain_name": "שופרסל",
+        "branch_name": "אקספרס דניה",
+        "city": "חיפה",
+        "address": "חיים הזז 5",
+        "price": 7,
+        "published_at": "2026-11-03T00:00:00+00:00",
+        "checked_at": "2026-11-03T04:45:13.302306+00:00",
+        "stale": false,
+        "history": [
+          {
+            "time": "2026-11-03T00:00:00+00:00",
+            "price": 7
+          }
+        ]
+      },
+      {
+        "store_id": "shufersal--327",
+        "store_name": "שופרסל · אקספרס חיפה- ראול ולנברג",
+        "chain": "shufersal",
+        "chain_name": "שופרסל",
+        "branch_name": "אקספרס חיפה- ראול ולנברג",
+        "city": "חיפה",
+        "address": "ראול וולנברג 9",
+        "price": 7,
+        "published_at": "2026-11-03T00:00:00+00:00",
+        "checked_at": "2026-11-03T04:22:57.508198+00:00",
+        "stale": false,
+        "history": [
+          {
+            "time": "2026-11-03T00:00:00+00:00",
+            "price": 7
+          }
+        ]
+      }
+    ]
+  }
+}
