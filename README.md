@@ -6,9 +6,13 @@ Existing production project: https://superbasket-mvp.vercel.app
 
 Hebrew RTL mobile interface, indexed barcode/name search, explicit list resolution (up to 200 lines), quantities, complete-basket ranking and exact two-store split comparisons including a user-supplied extra-stop cost. Partial and stale baskets cannot win. Saved baskets, share links, dark mode, PWA shell, local activity and price targets. Published promotion conditions are visible but **not subtracted** until their rule semantics are verified. Voice input depends on browser support. Photo OCR loads pinned Tesseract.js in the browser and requires review.
 
+## Automatic shopping cart (2026-11-04)
+
+The basket automatically shows its cheapest complete branch total and that branch's unit and line prices. Adding items or changing quantities refreshes pricing; customers can switch to another branch in a price-sorted picker. Missing/stale baskets never win. A three-minute in-memory quote allows instant quantity/removal updates; new products and changed scope trigger a fresh, fully paged comparison. Mobile keeps the total in a persistent bottom bar. See [implementation and verification](docs/live-basket-20261104.md).
+
 ## Product-first interface (November 2026)
 
-Warm cream, ink and coral mobile UI with five primary tabs, compact cart rows, a persistent compare action and collapsed advanced options. Product cards and basket rows open a price sheet in one tap. `/api/product` supports city/chain/explicit-store filters and stable pagination (up to 24 source branches per request), replacing the previous silent 12-branch limit. City/selected scopes with up to 120 branches load subsequent pages automatically; national searches are explicitly paged. Fresh-price summaries refer only to checked branches. Failed/missing sources and partial coverage remain visible. Chain grouping retains the underlying branch prices and publication times. Basket results separate complete, current baskets from incomplete or old price lists.
+Warm cream, ink and coral mobile UI with five primary tabs, compact cart rows, a persistent priced basket and collapsed advanced options. Product cards and basket rows open a price sheet in one tap. `/api/product` supports city/chain/explicit-store filters and stable pagination (up to 24 source branches per request), replacing the previous silent 12-branch limit. City/selected scopes with up to 120 branches load subsequent pages automatically; national searches are explicitly paged. Fresh-price summaries refer only to checked branches. Failed/missing sources and partial coverage remain visible. Chain grouping retains the underlying branch prices and publication times. Basket results separate complete, current baskets from incomplete or old price lists.
 
 ## Data architecture
 

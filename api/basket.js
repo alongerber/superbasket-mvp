@@ -16,6 +16,6 @@ export default async function handler(req,res){
   const errors=results.filter(r=>r.error),rows=results.filter(r=>!r.error).sort((a,b)=>Number(a.stale)-Number(b.stale)||a.missing_items.length-b.missing_items.length||a.shelf_total-b.shelf_total);
   let promotionDetailsOmitted=false;
   if(Buffer.byteLength(JSON.stringify(rows))>3500000){promotionDetailsOmitted=true;for(const s of rows)for(const p of s.products){delete p.promotions;delete p.name;delete p.updated_at;}}
-  res.setHeader('Cache-Control','no-store');res.json({stores:rows,promotion_details_omitted:promotionDetailsOmitted,...summarize(rows,items,Math.round(extra*100)),errors,total_stores:scope.total,checked_stores:scope.stores.length,offset:scope.offset,next_offset:scope.next_offset,partial:scope.offset>0||scope.next_offset!==null,as_of:m.generated_at,currency:'ILS',amount_unit:'agorot',source:'official-transparency-files',promotions_calculated:false});
+  res.setHeader('Cache-Control','no-store');res.json({stores:rows,promotion_details_omitted:promotionDetailsOmitted,...summarize(rows,items,Math.round(extra*100),{split:req.body.compute_split!==false}),errors,total_stores:scope.total,checked_stores:scope.stores.length,offset:scope.offset,next_offset:scope.next_offset,partial:scope.offset>0||scope.next_offset!==null,as_of:m.generated_at,currency:'ILS',amount_unit:'agorot',source:'official-transparency-files',promotions_calculated:false});
  }catch(e){return apiError(res,e);}
 }

@@ -28,3 +28,8 @@ test('cancelled comparison stops before another page can update the result',asyn
  const controller=new AbortController();let calls=0;
  await assert.rejects(()=>collectBasket(async q=>{calls++;return page(q);},{city:'חיפה',items,extra_stop_cost:0},()=>controller.abort(),controller.signal),{name:'AbortError'});assert.equal(calls,1);
 });
+
+test('automatic basket can use 24-branch pages without losing any branch or final ranking',async()=>{
+ const progress=[];const d=await collectBasket(async q=>page(q),{city:'חיפה',items,extra_stop_cost:0,compute_split:false,page_size:24},p=>progress.push(p));
+ assert.equal(progress.length,4);assert.equal(d.checked_stores,73);assert.equal(d.best,stores[70].id);assert.equal(d.split,null);
+});
