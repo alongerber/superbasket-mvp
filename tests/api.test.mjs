@@ -53,3 +53,23 @@ test('live basket combines an approved type with an exact GTIN using each branch
  assert.equal(d.errors.length,0);const complete=d.stores.filter(s=>s.total!==null);assert.ok(new Set(complete.map(s=>s.chain)).size>=3);
  for(const store of complete){const p=store.products[0];assert.ok(matchesNeed({weighted:true,name:p.matched_name},parseNeed(id)));assert.ok(hasKilogramUnit({weighted:true,unit:p.matched_unit}));assert.equal(p.subtotal,Math.round(p.price*1.25));assert.equal(store.total,store.products.reduce((n,p)=>n+p.subtotal,0));}
 });
+
+test('live universal alternatives support multiple departments, filters and explicit selection hydration',{skip:!enabled},async()=>{
+ for(const q of ['אורז','נייר טואלט','סוללות','שמפו','תפוח אדמה']){const found=await call('catalog',{query:{q,limit:'1'}}),source=found.data.items[0];assert.ok(source,q);const r=await call('equivalents',{query:{id:source.id,limit:'5'}});assert.equal(r.status,200,q);assert.equal(r.data.source.id,source.id);assert.equal(r.data.requires_confirmation,true);assert.ok(r.data.items.length,q);assert.ok(r.data.items.every(p=>p.id!==source.id&&p.profile&&p.conversion&&Array.isArray(p.differences)));if(r.data.has_more){const next=await call('equivalents',{query:{id:source.id,offset:'5',limit:'5'}});assert.ok(next.data.items.every(p=>!r.data.items.some(a=>a.id===p.id)));}const selected=r.data.items[0];const hydrated=await call('equivalents',{query:{id:source.id,q:'לאמוצרקיים',selected:selected.id}});assert.equal(hydrated.data.selected[0].id,selected.id);}
+});
+test('live approved basket resolves quantities from catalog and preserves exact comparison without approval',{skip:!enabled},async()=>{
+ const {catalog,manifest,branch}=await import('../lib/data.mjs'),{resolveApprovedChoices}=await import('../lib/equivalents.mjs'),{compareBranch}=await import('../lib/compare.mjs');
+ const db=await catalog(await manifest()),source=(await call('catalog',{query:{q:'אורז',limit:'1'}})).data.items[0];const options=(await call('equivalents',{query:{id:source.id,limit:'20'}})).data.items.filter(p=>p.conversion.automatic).slice(0,8);assert.ok(options.length);
+ const items=[{id:source.id,quantity:2,alternatives:options.map(p=>({id:p.id}))}],approved=resolveApprovedChoices(db,items);assert.equal(approved[0].choices.length,options.length+1);
+ const stores=(await manifest()).stores.filter(s=>s.city==='חיפה'&&s.object&&s.chain!=='wolt');
+ let matches=0;for(const s of stores){const data=await branch(s),result=compareBranch(s,data,approved);if(result.total===null)continue;matches++;const row=result.products[0],actual=data.products.find(p=>p.id===row.matched_id);assert.ok(actual);assert.equal(row.subtotal,Math.round(actual.price*row.purchase_quantity));assert.ok(approved[0].choices.some(c=>c.id===actual.id));}
+ assert.ok(matches>1);const apiResult=await call('basket',{method:'POST',body:{city:'חיפה',items,limit:24}});assert.equal(apiResult.status,200);assert.ok(apiResult.data.stores.some(s=>s.products[0].match_kind==='approved_alternative'));
+ const noApproval=await call('basket',{method:'POST',body:{city:'חיפה',items:[{id:source.id,quantity:2}],limit:24}});assert.ok(noApproval.data.stores.every(s=>!s.products[0].matched_id));
+});
+test('universal API rejects malformed filters and unapproved size inference',{skip:!enabled},async()=>{
+ for(const query of [{id:'bad'},{id:'07290000000001',limit:'1000'},{id:'07290000000001',offset:'-1'}])assert.equal((await call('equivalents',{query})).status,400);
+ assert.equal((await call('equivalents',{method:'POST'})).status,405);
+ const {catalog,manifest,search}=await import('../lib/data.mjs'),{resolveApprovedChoices}=await import('../lib/equivalents.mjs');const db=await catalog(await manifest()),source=search(db,'חיתולים',2);assert.ok(source.length===2);
+ assert.throws(()=>resolveApprovedChoices(db,[{id:source[0].id,quantity:1,alternatives:[{id:source[1].id}]}]));
+ const approved=resolveApprovedChoices(db,[{id:source[0].id,quantity:1,alternatives:[{id:source[1].id,manual_ratio:1}]}]);assert.equal(approved[0].choices[1].manual,true);
+});

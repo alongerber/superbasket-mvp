@@ -1,3 +1,4 @@
+import {normalizeAlternatives,alternativesKey} from './product-equivalence.mjs';
 import {parseNeed,needProduct} from './product-needs.mjs';
 import {classifyProduct,categoryPath} from './taxonomy.mjs';
 
@@ -15,7 +16,7 @@ export function missingDiagnostics(results,store,items){
     return {...p,pricedBranches:priced.length,reason:priced.length?`יש מחיר ב־${priced.length} סניפים אחרים באזור`:'לא נמצא מחיר עדכני למוצר הזה בסניפים שנבדקו'};
   });
 }
-export function basketKey(items){return JSON.stringify(items.map(p=>[p.id,p.quantity]).sort((a,b)=>a[0].localeCompare(b[0])));}
+export function basketKey(items){return JSON.stringify(items.map(p=>[p.id,p.quantity,alternativesKey(p)]).sort((a,b)=>a[0].localeCompare(b[0])));}
 export function basketDrop(watch,results,scope){
   if(watch.scope!==scope||watch.key!==basketKey(results.items))return null;
   const store=recommendStore(results);
@@ -35,7 +36,7 @@ export function validateShared(input){
   const ids=new Set();
   const clean=items.map(p=>{
     if(!p||typeof p.id!=='string'||(!/^([a-z0-9-]+:)?[0-9]{1,30}$/.test(p.id)&&!parseNeed(p.id))||ids.has(p.id)||typeof p.name!=='string'||!p.name.trim()||p.name.length>300||!Number.isFinite(p.quantity)||p.quantity<.001||p.quantity>99||(!p.weighted&&!Number.isInteger(p.quantity)))throw Error('קישור הסל אינו תקין');
-    ids.add(p.id);if(parseNeed(p.id))return {...needProduct(p.id),quantity:p.quantity};return {id:p.id,name:p.name,quantity:p.quantity,weighted:!!p.weighted,barcode:typeof p.barcode==='string'?p.barcode:undefined};
+    ids.add(p.id);if(parseNeed(p.id))return {...needProduct(p.id),quantity:p.quantity};return {id:p.id,name:p.name,quantity:p.quantity,weighted:!!p.weighted,barcode:typeof p.barcode==='string'?p.barcode:undefined,...(p.alternatives?.length?{alternatives:normalizeAlternatives(p.alternatives,p.id)}:{})};
   });
   return {items:clean,city:!Array.isArray(input)&&typeof input.city==='string'?input.city.slice(0,100):''};
 }

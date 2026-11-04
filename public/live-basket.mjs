@@ -1,3 +1,4 @@
+import {alternativesKey} from './product-equivalence.mjs';
 import {summarize} from './basket-summary.mjs';
 
 export const QUOTE_TTL = 3 * 60 * 1000;
@@ -7,13 +8,14 @@ export const scopeKey = request => JSON.stringify([request.city.trim(), [...(req
 // Missing prices stay missing, and a branch can age out of the ranking.
 export function repriceBasket(quote, items, now = Date.now()) {
   if (!items.length || items.some(item => !Number.isFinite(item.quantity) || item.quantity <= 0 || item.quantity > 99)) return null;
-  const known = new Set(quote.items.map(item => item.id));
-  if (items.some(item => !known.has(item.id))) return null;
+  const known = new Map(quote.items.map(item => [item.id,item]));
+  if(items.some(item=>!known.has(item.id)||alternativesKey(item)!==alternativesKey(known.get(item.id))||(item.alternatives?.length&&item.quantity!==known.get(item.id).quantity)))return null;
   const stores = quote.stores.map(store => {
     const index = new Map(store.products.map(product => [product.id, product]));
     const products = items.map(item => {
       const product = index.get(item.id);
       if (!product || product.missing || !Number.isSafeInteger(product.price) || product.price <= 0) return {...item, missing: true};
+      if(item.alternatives?.length)return {...product,...item};
       if (!product.weighted && !Number.isInteger(item.quantity)) return {...item, missing: true, reason: 'נדרשת כמות שלמה למוצר ארוז'};
       return {...product, ...item, subtotal: Math.round(product.price * item.quantity)};
     });

@@ -8,6 +8,7 @@ import israeli_prices as ilp
 from israeli_prices.core.http import HttpClient
 from official_adapters import FilteredShufersal
 from collection_control import ChainBudget
+from catalog_metadata import CATALOG_UPSERT
 TZ=ZoneInfo('Asia/Jerusalem');ROOT=Path(__file__).resolve().parents[1]
 OUT=Path(os.getenv('DATA_DIR',str(ROOT/'.snapshots')));OUT.mkdir(parents=True,exist_ok=True);(OUT/'objects').mkdir(exist_ok=True)
 def now():return datetime.now(timezone.utc).isoformat()
@@ -158,7 +159,7 @@ def export_catalog(stores,target):
  CREATE TABLE products(id TEXT PRIMARY KEY,barcode TEXT,name TEXT NOT NULL,search TEXT NOT NULL,min_price INTEGER,max_price INTEGER,stores INTEGER,weighted INTEGER,unit TEXT,manufacturer TEXT);
  CREATE VIRTUAL TABLE product_search USING fts5(id UNINDEXED,name,tokenize='unicode61');
  CREATE TABLE stores(id TEXT PRIMARY KEY,data TEXT NOT NULL);''')
- sql='INSERT INTO products VALUES(?,?,?,?,?,?,1,?,?,?) ON CONFLICT(id) DO UPDATE SET min_price=min(min_price,excluded.min_price),max_price=max(max_price,excluded.max_price),stores=stores+1'
+ sql=CATALOG_UPSERT
  for s in stores:
   db.execute('INSERT INTO stores VALUES(?,?)',(s['id'],json.dumps(s,ensure_ascii=False)))
   if s.get('object'):

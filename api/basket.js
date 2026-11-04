@@ -1,4 +1,5 @@
-import {manifest,branch,mapLimit,apiError} from '../lib/data.mjs';
+import {resolveApprovedChoices} from '../lib/equivalents.mjs';
+import {manifest,catalog,branch,mapLimit,apiError} from '../lib/data.mjs';
 import {validateItems,compareBranch,summarize} from '../lib/compare.mjs';
 import {basketScope} from '../lib/basket-scope.mjs';
 export default async function handler(req,res){
@@ -9,6 +10,7 @@ export default async function handler(req,res){
  try{basketScope([],req.body);}catch(e){return res.status(400).json({error:e.message});}
  try{
   const m=await manifest();
+  if(items.some(p=>p.alternatives?.length)){const db=await catalog(m);try{items=resolveApprovedChoices(db,items);}catch(e){return res.status(400).json({error:e.message});}}
   if(req.body.as_of&&req.body.as_of!==m.generated_at)return res.status(409).json({error:'המחירונים התעדכנו בזמן הבדיקה. לחצו שוב על השוואה לקבלת תוצאה מאותו עדכון.',code:'SNAPSHOT_CHANGED'});
   const scope=basketScope(m.stores,req.body);
   if(!scope.total)return res.status(404).json({error:'עדיין אין מחירונים מאומתים באזור שבחרת. אפשר לבחור סניפים במסך הכיסוי.'});

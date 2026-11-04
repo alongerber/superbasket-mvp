@@ -10,6 +10,12 @@ Hebrew RTL mobile interface, indexed barcode/name search, explicit list resoluti
 
 The basket automatically shows its cheapest complete branch total and that branch's unit and line prices. Adding items or changing quantities refreshes pricing; customers can switch to another branch in a price-sorted picker. Missing/stale baskets never win. A three-minute in-memory quote allows instant quantity/removal updates; new products and changed scope trigger a fresh, fully paged comparison. Mobile keeps the total in a persistent bottom bar. See [implementation and verification](docs/live-basket-20261104.md).
 
+## Approved alternatives for every catalog product (2026-11-04)
+
+Every physical catalog item can retain its original barcode and an explicitly approved set of alternatives. There is no category whitelist. The basket editor can review every line; product sheets, missing-price diagnostics and individual rows open the same editor. Default suggestions preserve attributes detected in source names; customers can relax filters or search the catalog. Full names, IDs, package sizes and detected differences are shown before approval.
+
+The server derives conversions from explicit package sizes, rounds up to whole packages, and compares the actual payable line amounts. Ambiguous sizes require an explicit user-entered ratio. Changes to quantity or approved sets invalidate cached quotes. Chosen product identity and purchase quantity survive split shopping, checkout-list copying, checklists, saved/shared baskets and watch keys. A source price is never a stock claim. See [verification and limits](docs/universal-alternatives-20261104.md).
+
 ## Product-first interface (November 2026)
 
 Warm cream, ink and coral mobile UI with five primary tabs, compact cart rows, a persistent priced basket and collapsed advanced options. Product cards and basket rows open a price sheet in one tap. `/api/product` supports city/chain/explicit-store filters and stable pagination (up to 24 source branches per request), replacing the previous silent 12-branch limit. City/selected scopes with up to 120 branches load subsequent pages automatically; national searches are explicitly paged. Fresh-price summaries refer only to checked branches. Failed/missing sources and partial coverage remain visible. Chain grouping retains the underlying branch prices and publication times. Basket results separate complete, current baskets from incomplete or old price lists.
