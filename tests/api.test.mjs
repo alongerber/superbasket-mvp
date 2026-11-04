@@ -37,3 +37,19 @@ test('planner API reports missing setup honestly and does not infer when a key i
  const result=await call('planner',{method:'POST',body:{action:'generate',people:4,prompt:'על האש',authorized:true,AI_USAGE_MODE:'public'}});
  assert.equal(result.status,503);assert.equal(result.data.code,'AI_USAGE_DISABLED');assert.ok(!JSON.stringify(result).includes('test-key-never-sent'));
 });
+
+
+test('live type search and product API keep actual retailer names, page every branch and preserve exact results',{skip:!enabled},async()=>{
+ const found=await call('catalog',{query:{q:'אנטריקוט',limit:'5'}});assert.equal(found.status,200);assert.equal(found.data.items.length,5);assert.ok(found.data.items.every(p=>!p.id.startsWith('need:')));
+ const need=found.data.needs.find(p=>p.need.freshness==='fresh');assert.ok(need);assert.equal(need.identity.kind,'shopping_need');
+ let offset=0,checked=0,total;const rows=[];
+ do{const r=await call('product',{query:{id:need.id,city:'חיפה',limit:'24',offset:String(offset)}});assert.equal(r.status,200);total=r.data.total_stores;checked+=r.data.checked_stores;assert.equal(r.data.checked_stores,r.data.prices.length+r.data.missing_prices+r.data.errors.length);rows.push(...r.data.prices);offset=r.data.next_offset;}while(offset!==null);
+ assert.equal(checked,total);assert.ok(new Set(rows.map(r=>r.chain)).size>=3);assert.ok(rows.every(r=>r.matched_name&&r.matched_id.startsWith(r.chain+':')&&r.matched_unit));
+});
+test('live basket combines an approved type with an exact GTIN using each branch subtotal',{skip:!enabled},async()=>{
+ const {collectBasket}=await import('../public/basket-client.mjs'),{parseNeed,matchesNeed,hasKilogramUnit}=await import('../public/product-needs.mjs');
+ const id='need:v1-ribeye-fresh-regular-any',items=[{id,quantity:1.25},{id:'07290000066332',quantity:2}];
+ const d=await collectBasket(async body=>(await call('basket',{method:'POST',body})).data,{city:'חיפה',items,extra_stop_cost:10});
+ assert.equal(d.errors.length,0);const complete=d.stores.filter(s=>s.total!==null);assert.ok(new Set(complete.map(s=>s.chain)).size>=3);
+ for(const store of complete){const p=store.products[0];assert.ok(matchesNeed({weighted:true,name:p.matched_name},parseNeed(id)));assert.ok(hasKilogramUnit({weighted:true,unit:p.matched_unit}));assert.equal(p.subtotal,Math.round(p.price*1.25));assert.equal(store.total,store.products.reduce((n,p)=>n+p.subtotal,0));}
+});

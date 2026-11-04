@@ -1,3 +1,4 @@
+import {catalogNeeds} from '../lib/product-needs.mjs';
 import {manifest,catalog,search,publicProduct,apiError} from '../lib/data.mjs';
 import {alternatives} from '../lib/alternatives.mjs';
 import {categorySearch} from '../lib/categories.mjs';
@@ -10,7 +11,8 @@ export default async function handler(req,res){
   const m=await manifest(),db=await catalog(m),sourceId=String(req.query?.alternatives_for||'').slice(0,90);
   res.setHeader('Cache-Control','public, max-age=60, s-maxage=120');
   if(sourceId){const source=db.prepare('SELECT * FROM products WHERE id=?').get(sourceId);if(!source)return res.status(404).json({error:'המוצר המקורי לא נמצא'});const rows=alternatives(db,source);return res.json({items:rows.map(p=>({...publicProduct(p),alternative:true,differences:p.differences})),source:publicProduct(source),as_of:m.generated_at,match_type:'suggested-alternative',requires_confirmation:true});}
-  if(category){const d=categorySearch(db,category,q,limit,offset);return res.json({...d,items:d.items.map(publicProduct),category,as_of:m.generated_at});}
-  const rows=search(db,q,limit+1,offset);res.json({items:rows.slice(0,limit).map(publicProduct),total:m.products,as_of:m.generated_at,has_more:rows.length>limit});
+  const needs=offset===0?catalogNeeds(db,q,category):[];
+  if(category){const d=categorySearch(db,category,q,limit,offset);return res.json({...d,needs,items:d.items.map(publicProduct),category,as_of:m.generated_at});}
+  const rows=search(db,q,limit+1,offset);res.json({needs,items:rows.slice(0,limit).map(publicProduct),total:m.products,as_of:m.generated_at,has_more:rows.length>limit});
  }catch(e){return apiError(res,e);}
 }

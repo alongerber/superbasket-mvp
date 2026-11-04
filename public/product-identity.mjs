@@ -1,4 +1,5 @@
 export function identity(product){
+ if(String(product?.id||'').startsWith('need:'))return {kind:'shopping_need',chain:null,code:product.id};
  const split=String(product?.id||'').indexOf(':');
  return split>0?{kind:'retailer_code',chain:String(product.id).slice(0,split),code:String(product.id).slice(split+1)}:{kind:'barcode',chain:null,code:product?.barcode||product?.id||''};
 }
