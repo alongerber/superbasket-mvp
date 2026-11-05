@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><rect width="1200" height="630" fill="#f1f4b7"/><rect x="28" y="28" width="1144" height="574" rx="38" fill="#f7f9d9"/><rect x="746" y="60" width="385" height="72" rx="20" fill="#14264b"/><text x="942" y="108" text-anchor="middle" font-family="DejaVu Sans" font-size="32" font-weight="bold" fill="#eef58b" direction="rtl" unicode-bidi="embed">מי סופר?</text><text x="780" y="98" text-anchor="middle" font-family="DejaVu Sans" font-size="9" font-weight="bold" fill="#fff">ME</text><text x="780" y="111" text-anchor="middle" font-family="DejaVu Sans" font-size="9" font-weight="bold" fill="#fff">SUPER</text><text x="1115" y="258" text-anchor="start" direction="rtl" unicode-bidi="embed" font-family="DejaVu Sans" font-size="80" font-weight="bold" fill="#14264b">אותו סל.</text><text x="1115" y="363" text-anchor="start" direction="rtl" unicode-bidi="embed" font-family="DejaVu Sans" font-size="80" font-weight="bold" fill="#183ee8">איפה פחות?</text><text x="1115" y="438" text-anchor="start" direction="rtl" unicode-bidi="embed" font-family="DejaVu Sans" font-size="28" fill="#425337">מרכיבים סל. משווים סופרים. רואים כמה עולה.</text><rect x="738" y="488" width="377" height="54" rx="27" fill="#183ee8"/><text x="926" y="523" text-anchor="middle" font-family="DejaVu Sans" font-size="23" font-weight="bold" fill="#fff" direction="rtl" unicode-bidi="embed">בשביל זה יש ME.</text><g fill="none" transform="translate(75,115) scale(2.35)">
+  <ellipse cx="85" cy="165" rx="57" ry="9" fill="#152957" opacity=".09"/>
+  <path d="m39 46 91 9 12 107-119-7L39 46Z" fill="#183ee8"/>
+  <path d="m130 55 13-8 12 106-13 9-12-107Z" fill="#102baf"/>
+  <path d="m39 46 13-8 91 9-13 8-91-9Z" fill="#5577ff"/>
+  <path d="m61 57 2-26c1-16 37-14 36 4l-1 25" stroke="#122650" stroke-width="7" stroke-linecap="round"/>
+  <path d="M67 87c3-22 40-19 38 4-1 13-22 14-22 29" stroke="#eef58b" stroke-width="12" stroke-linecap="round"/>
+  <circle cx="82" cy="139" r="6" fill="#eef58b"/>
+  <path d="m16 30 3 8 8 3-8 3-3 8-3-8-8-3 8-3 3-8Z" fill="#183ee8"/>
+  <path d="m138 13 2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5Z" fill="#183ee8"/>
+
+</g></svg>
