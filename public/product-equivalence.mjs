@@ -75,7 +75,7 @@ export function differences(source,candidate){
  const a=profile(source),b=profile(candidate),changes=[];
  if(a.category!==b.category)changes.push('קטגוריה אחרת: '+b.categoryName);
  for(const key of new Set([...Object.keys(a.features),...Object.keys(b.features)]))if(!same(a.features[key]||[],b.features[key]||[]))changes.push(key+' שונה או לא צוין באחד השמות');
- if(a.manufacturer!==b.manufacturer)changes.push(!a.manufacturer||!b.manufacturer?'יצרן לא צוין באחד המקורות':'יצרן שונה');
+ if(a.manufacturer!==b.manufacturer)changes.push(!a.manufacturer||!b.manufacturer?'יצרן לא צוין באחד המקורות':'פרטי היצרן שונים בין המקורות');
  if(!a.measure||!b.measure)changes.push('גודל אריזה לא זוהה בוודאות');else if(a.measure.basis!==b.measure.basis||a.measure.amount!==b.measure.amount)changes.push('גודל אריזה / יחידת מכירה שונים');
  const extra=queryTerms(candidate).filter(w=>!queryTerms(source).includes(w));if(extra.length)changes.push('תיאור נוסף בחלופה: '+extra.slice(0,5).join(' · '));
  return changes;

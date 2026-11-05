@@ -10,5 +10,17 @@ export function quantityLabel(p,n){
 export function replacementLabel(source,sourceQuantity,candidate,purchaseQuantity){
  if(purchaseQuantity===null)return 'בחרו כמה לקנות במקום הכמות שברשימה';
  const original=quantityLabel(source,sourceQuantity),replacement=quantityLabel(candidate,purchaseQuantity);
- return replacement===original?'לרכישה: '+replacement:replacement+' במקום '+original;
+ const a=measure(source),b=measure(candidate),sameAmount=sourceQuantity===purchaseQuantity&&!!source.weighted===!!candidate.weighted&&a&&b&&a.basis===b.basis&&a.amount===b.amount;
+ return replacement===original||sameAmount?'לרכישה: '+replacement:replacement+' במקום '+original;
+}
+
+export const countLabel=(n,singular,plural)=>`${number(n)} ${n===1?singular:plural}`;
+export function purchaseLabel(n,label){return countLabel(n,n===1?({"יחידות":"יחידה","אריזות":"אריזה","מוצרים":"מוצר","כוסות":"כוס","כפות":"כף","כפיות":"כפית"}[label]||label):label,label);}
+export function replacementAmount(source,sourceQuantity,candidate,purchaseQuantity){
+ const a=measure(source),b=measure(candidate);
+ if(!a||!b||a.basis!==b.basis||!Number.isFinite(purchaseQuantity)||purchaseQuantity<=0)return '';
+ const total=b.amount*purchaseQuantity,wanted=a.amount*sourceQuantity,extra=Math.round((total-wanted)*1000)/1000;
+ const amount=value=>b.basis==='mass'?(value>=1000?number(value/1000)+' ק״ג':number(value)+' גרם'):b.basis==='volume'?(value>=1000?number(value/1000)+' ליטר':number(value)+' מ״ל'):purchaseLabel(value,'יחידות');
+ if(candidate.weighted&&Math.abs(extra)<.001)return '';
+ return 'סה״כ '+amount(total)+(extra>.001?' · '+amount(extra)+' מעבר לכמות המקורית':extra<-.001?' · פחות '+amount(-extra)+' מהכמות המקורית':'');
 }

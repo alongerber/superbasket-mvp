@@ -5,7 +5,7 @@ export function shoppingReadiness(results,items,store,pendingCount=0){
   const elsewhere=(results?.stores||[]).filter(s=>!s.stale&&s.products.some(p=>p.id===item.id&&pricedLine(p)));
   return {item,elsewhere:elsewhere.length,reason:elsewhere.length?`לבחירה הזאת יש מחיר ב־${elsewhere.length} סניפים שנבדקו, אך לא מחיר עדכני בסניף המוצג.`:'לא נמצא מחיר עדכני לבחירה הזאת בסניפים שנבדקו.'};
  });
- return {issues,pendingCount,count:issues.length+pendingCount,ready:coverage.complete&&pendingCount===0,priced:coverage.priced.length,reference:store};
+ return {issues,pendingCount,count:issues.length+pendingCount,cartReady:coverage.complete,ready:coverage.complete&&pendingCount===0,priced:coverage.priced.length,reference:store};
 }
 export function quantityRatio(baseQuantity,purchase,weighted=false){
  if(!Number.isFinite(baseQuantity)||baseQuantity<=0||!Number.isFinite(purchase)||purchase<=0||purchase>99||(!weighted&&!Number.isInteger(purchase))||weighted&&Math.abs(purchase*1000-Math.round(purchase*1000))>1e-7)throw Error('בחרו כמות תקינה לרכישה');

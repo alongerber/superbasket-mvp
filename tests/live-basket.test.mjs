@@ -47,3 +47,8 @@ test('network failure clears prices and a forced retry can recover',async()=>{
  live.update(request());await tick();assert.equal(states.at(-1).phase,'error');assert.equal(states.at(-1).data,null);
  fail=false;live.update(request(),{force:true});await tick();assert.equal(states.at(-1).phase,'ready');live.cancel();
 });
+test('same-area refresh retains only an explicitly previous quote, and area changes clear it',async()=>{
+ const states=[];let fail=false;const live=createLiveBasket({delay:1,now:()=>now,load:async()=>{if(fail)throw Error('network');return quote();},emit:s=>states.push(s)});
+ live.update(request());await tick();fail=true;live.update({...request(),items:[...items,{id:'new',quantity:1}]});assert.equal(states.at(-1).data,null);assert.ok(states.at(-1).previous);await tick();assert.equal(states.at(-1).phase,'error');assert.equal(states.at(-1).data,null);assert.ok(states.at(-1).previous);
+ live.update({...request(),city:'נשר'});assert.equal(states.at(-1).previous,null);live.cancel();
+});

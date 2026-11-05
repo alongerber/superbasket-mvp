@@ -42,20 +42,21 @@ export function createLiveBasket({load, emit, delay = 350, now = Date.now}) {
       const data = repriceBasket(cache.data, request.items, now());
       if (data) { emit({phase: 'ready', data, checkedAt: cache.at}); return; }
     }
-    emit({phase: 'loading', data: null, progress: {checked: 0}});
+    const previous=cache?.scope===scope?cache.data:null;
+    emit({phase: 'loading', data: null, previous, progress: {checked: 0}});
     controller = new AbortController();
     const signal = controller.signal;
     timer = setTimeout(async () => {
       try {
         const data = await load(request, progress => {
-          if (sequence === version) emit({phase: 'loading', data: null, progress});
+          if (sequence === version) emit({phase: 'loading', data: null, previous, progress});
         }, signal);
         if (sequence !== version || signal.aborted) return;
         const at = now();
         cache = {scope, at, data};
         emit({phase: 'ready', data: repriceBasket(data, request.items, at), checkedAt: at});
       } catch (error) {
-        if (sequence === version && !signal.aborted) emit({phase: 'error', data: null, error: error.message, errorProductId:error.product_id, errorCode:error.code});
+        if (sequence === version && !signal.aborted) emit({phase: 'error', data: null, previous, error: error.message, errorProductId:error.product_id, errorCode:error.code});
       }
     }, force ? 0 : delay);
   }
